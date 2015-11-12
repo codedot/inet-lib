@@ -1,6 +1,6 @@
-var grammar = require("./grammar");
+var compile = require("./compile");
 
-var parser = new grammar.Parser();
+var parser = new compile.Parser();
 var inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
 var typelist, types, ntypes, wiretype, ambtype, table;
 var lpaxtype, rpaxtype;
