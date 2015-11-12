@@ -1,0 +1,7 @@
+{
+	"description": "JavaScript Engine for Interaction Nets",
+	"author": "Anton Salikhmetov",
+	"repository": "euromake/inet#nodejs",
+	"name": "inet-lib",
+	"version": "0.0.1"
+}
