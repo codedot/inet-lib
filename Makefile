@@ -9,7 +9,7 @@ $(JISON):
 	npm install jison
 
 clean:
-	-rm -f grammar.js *.tmp
+	-rm -f *.tmp
 	-rm -fr node_modules
 
 .POSIX:
