@@ -1,9 +1,6 @@
-var mlc2in = require("./encode");
-var inet = require("./agents");
-var fs = require("fs");
+var grammar = require("./grammar");
 
-var example = fs.readFileSync("fact.mlc", "utf8");
-var parser = new inet.Parser();
+var parser = new grammar.Parser();
 var inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
 var typelist, types, ntypes, wiretype, ambtype, table;
 var lpaxtype, rpaxtype;
@@ -618,9 +615,8 @@ function init()
 	flush(queue);
 }
 
-function prepare(mlc)
+function prepare(src)
 {
-	var src = mlc2in(mlc);
 	var system = parser.parse(src);
 
 	inverb = system.code;
@@ -806,19 +802,10 @@ function run(mlc)
 	reduce();
 
 	inenv.stats = getstats();
-
-	inenv.term = mlc2in.term;
-
-	if (inenv.nf)
-		inenv.nf = obj2mlc(inenv.nf);
-	else
-		inenv.nf = inenv.term;
-
+	inenv.nf = obj2mlc(inenv.nf);
 	return inenv;
 }
 
 run.prepare = prepare;
 run.debug = debug;
-run.mlc2in = mlc2in;
-run.example = example.replace(/\n*$/, "");
-global.mlcjs = run;
+module.exports = run;

@@ -1,12 +1,15 @@
 JISON = node_modules/.bin/jison
 
 all: grammar.js
+	node check.js debug.in >debug.tmp
+	tail debug.tmp
+	time -p node check.js
 
 $(JISON):
 	npm install jison
 
 clean:
-	-rm -f grammar.js
+	-rm -f grammar.js *.tmp
 	-rm -fr node_modules
 
 .POSIX:
