@@ -16,10 +16,7 @@ if (file) {
 } else {
 	var example = fs.readFileSync("example.in", "utf8");
 	var output = inet(example);
-	var stats = JSON.stringify(output.stats, null, "\t");
 
 	console.info("%s(%s)", output.total, output.beta);
 	console.log(output.nf);
-
-	fs.writeFileSync("profile.json", stats + "\n");
 }
