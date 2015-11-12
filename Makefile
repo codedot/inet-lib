@@ -1,8 +1,7 @@
 JISON = node_modules/.bin/jison
 
 all: compile.js
-	node test.js debug.in >debug.tmp
-	tail debug.tmp
+	node test.js debug.in
 	time -p node test.js
 
 compile.js: grammar.jison

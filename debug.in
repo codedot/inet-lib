@@ -1,245 +1,3 @@
-\eval[\fan_{i}(a, b)] {
-	/* Postpone evaluation. */
-	++this.total;
-} \fan_{i}[a, b];
-
-\eval[\box_{i}(a)] {
-	/* Evaluate bracket. */
-	++this.total;
-} \box_{i}[\eval(a)];
-
-\eval[\var_{i}(a)] {
-	/* Evaluate croissant. */
-	++this.total;
-} \var_{i}[\eval(a)];
-
-\eval[a] {
-	/* Continue evaluation. */
-	++this.total;
-} \wait[\eval(a), \call];
-
-\eval[\atom_{M}] {
-	/* Return an atom. */
-	++this.total;
-} \atom_{M};
-
-\eval[\lambda_{i}(a, b)] {
-	/* Evaluate abstraction. */
-	++this.total;
-} \lambda_{i}[a, \eval(b)];
-
-\var_{i}[\fan_{j - 1}(a, b)] {
-	/* Level down higher fan. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \fan_{j}[\var_{i}(a), \var_{i}(b)];
-
-\fan_{i}[\var_{j}(a), \var_{j}(b)] {
-	/* Duplicate higher croissant. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \var_{j}[\fan_{i}(a, b)];
-
-\fan_{i}[\box_{j}(a), \box_{j}(b)] {
-	/* Duplicate higher bracket. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \box_{j}[\fan_{i}(a, b)];
-
-\box_{i}[\fan_{j + 1}(a, b)] {
-	/* Level up higher fan. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \fan_{j}[\box_{i}(a), \box_{i}(b)];
-
-\box_{i}[\box_{j + 1}(a)] {
-	/* Level up higher bracket. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \box_{j}[\box_{i}(a)];
-
-\var_{i}[\var_{j - 1}(a)] {
-	/* Level down higher bracket. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \var_{j}[\var_{i}(a)];
-
-\var_{i}[\box_{j - 1}(a)] {
-	/* Level down higher bracket. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \box_{j}[\var_{i}(a)];
-
-\box_{i}[\var_{j + 1}(a)] {
-	/* Level up higher croissant. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \var_{j}[\box_{i}(a)];
-
-\print {
-	/* Ignore bracket. */
-	++this.total;
-} \box_{i}[\print];
-
-\read_{C}[\box_{i}(a)] {
-	/* Pass through context. */
-	++this.total;
-} \box_{i}[\read_{C}(a)];
-
-\var_{i}[a] {
-	/* Annihilate matching croissants. */
-	if (i == j)
-		++this.total;
-	else
-		return false;
-} \var_{j}[a];
-
-\box_{i}[a] {
-	/* Annihilate matching brackets. */
-	if (i == j)
-		++this.total;
-	else
-		return false;
-} \box_{j}[a];
-
-\box_{i}[\apply_{j + 1}(a, b)] {
-	/* Level up higher application. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \apply_{j}[\box_{i}(a), \box_{i}(b)];
-
-\box_{i}[\lambda_{j + 1}(a, b)] {
-	/* Level up higher abstraction. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \lambda_{j}[\box_{i}(a), \box_{i}(b)];
-
-\print {
-	/* Ignore croissant. */
-	++this.total;
-} \var_{i}[\print];
-
-\read_{C}[\var_{i}(a)] {
-	/* Pass through context. */
-	++this.total;
-} \var_{i}[\read_{C}(a)];
-
-\var_{i}[\apply_{j - 1}(a, b)] {
-	/* Level down higher application. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \apply_{j}[\var_{i}(a), \var_{i}(b)];
-
-\var_{i}[\lambda_{j - 1}(a, b)] {
-	/* Level down higher abstraction. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \lambda_{j}[\var_{i}(a), \var_{i}(b)];
-
-\erase {
-	/* Erase croissant. */
-	++this.total;
-} \var_{i}[\erase];
-
-\erase {
-	/* Erase bracket. */
-	++this.total;
-} \box_{i}[\erase];
-
-\var_{i}[\wait(a, b)] {
-	/* Postpone croissant. */
-	++this.total;
-} \wait[\var_{i}(a), b];
-
-\box_{i}[\wait(a, b)] {
-	/* Postpone bracket. */
-	++this.total;
-} \wait[\box_{i}(a), b];
-
-\var_{i}[\atom_{M}] {
-	/* Return an atom. */
-	++this.total;
-} \atom_{M};
-
-\box_{i}[\atom_{M}] {
-	/* Return an atom. */
-	++this.total;
-} \atom_{M};
-
-\read_{C}[\fan_{i}(a, b)] {
-	/* Duplicate context. */
-	++this.total;
-} \fan_{i}[\read_{C}(a), \read_{this.clone(C)}(b)];
-
-\call {
-	/* Erase late call. */
-	++this.total;
-} \erase;
-
-\fan_{i}[\wait(a, \amb(b, \decide(c, d), d)), \wait(e, b)] {
-	/* Postpone duplication. */
-	++this.total;
-} \wait[\fan_{i}(a, e), c];
-
-\call {
-	/* Continue evaluation. */
-	++this.total;
-} \decide[\call, \erase];
-
-\erase {
-	/* Erase reference. */
-	++this.total;
-} \decide[a, a];
-
-\call {
-	/* Continue evaluation. */
-	++this.total;
-} \hold[a, \eval(a)];
-
-\read_{C}[\wait(a, b)] {
-	/* Postpone readback. */
-	++this.total;
-} \wait[\read_{C}(a), b];
-
-\erase {
-	/* Erase holder. */
-	++this.total;
-} \hold[\erase, \erase];
-
-\erase {
-	/* Erase reference. */
-	++this.total;
-} \wait[\erase, \erase];
-
-\apply_{i}[a, \wait(b, \hold(\apply_{i}(a, b), \wait(c, d)))] {
-	/* Postpone application. */
-	++this.total;
-} \wait[c, d];
-
 \print {
 	/* Output results of read-back. */
 	this.nf = M;
@@ -247,11 +5,21 @@
 } \atom_{M};
 
 \read_{C}[a] {
+	/* Unshare variable. */
+	++this.total;
+} \share[\copy(b, \read_{C}(a)), b];
+
+\read_{C}[a] {
+	/* Initiate application. */
+	++this.total;
+} \apply[\lambda(b, \read_{C}(a)), b];
+
+\read_{C}[a] {
 	/* Read back abstraction. */
 	++this.total;
-} \lambda_{i}[\atom_{this.mkid()}, \read_{this.abst(C)}(a)];
+} \lambda[\atom_{this.mkid()}, \read_{this.abst(C)}(a)];
 
-\apply_{i}[\read_{this.appl(M)}(a), a] {
+\lambda[\read_{this.appl(M)}(a), a] {
 	/* Read back application. */
 	++this.total;
 } \atom_{M};
@@ -261,50 +29,72 @@
 	++this.total;
 } \atom_{M};
 
-\fan_{i}[\atom_{M}, \atom_{M}] {
+\copy[\atom_{M}, \atom_{M}] {
+	/* Copy an atom. */
+	++this.total;
+} \atom_{M};
+
+\dup[\atom_{M}, \atom_{M}] {
 	/* Duplicate an atom. */
 	++this.total;
 } \atom_{M};
 
-\apply_{i}[a, b] {
-	/* Annihilate matching abstraction and application. */
-	if (i == j)
-		++this.beta;
-	else
-		return false;
-} \lambda_{j}[\wait(c, \hold(c, a)), b];
+\lambda[a, b] {
+	/* Unshare variable. */
+	++this.total;
+} \share[\copy(c, \lambda(a, b)), c];
 
-\fan_{i}[\apply_{j}(a, b), \apply_{j}(c, d)] {
-	/* Duplicate higher application. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \apply_{j}[\fan_{i}(a, c), \fan_{i}(b, d)];
+\lambda[a, b] {
+	/* Initiate application. */
+	++this.total;
+} \apply[\lambda(c, \lambda(a, b)), c];
 
-\fan_{i}[\lambda_{j}(a, b), \lambda_{j}(c, d)] {
-	/* Duplicate higher abstraction. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \lambda_{j}[\fan_{i}(a, c), \fan_{i}(b, d)];
+\lambda[a, b] {
+	/* Apply a closed term. */
+	++this.beta;
+	++this.total;
+} \lambda[a, b];
 
-\fan_{i}[a, b] {
-	/* Annihilate matching fans. */
-	if (i == j)
-		++this.total;
-	else
-		return false;
-} \fan_{j}[a, b];
+\copy[a, b] {
+	/* Unshare variable. */
+	++this.total;
+} \share[\copy(c, \copy(a, b)), c];
 
-\fan_{i}[\fan_{j}(a, b), \fan_{j}(c, d)] {
-	/* Duplicate higher fan. */
-	if (i < j)
-		++this.total;
-	else
-		return false;
-} \fan_{j}[\fan_{i}(a, c), \fan_{i}(b, d)];
+\copy[a, b] {
+	/* Initiate application. */
+	++this.total;
+} \apply[\lambda(c, \copy(a, b)), c];
+
+\copy[\lambda(a, b), \lambda(c, d)] {
+	/* Initiate copy of a closed term. */
+	++this.total;
+} \lambda[\dup(a, c), \dup(b, d)];
+
+\dup[a, b] {
+	/* Unshare variable. */
+	++this.total;
+} \share[\copy(c, \dup(a, b)), c];
+
+\dup[a, b] {
+	/* Duplicate sharing. */
+	++this.total;
+} \copy[\dup(\amb(c, \share(a, d), d), \amb(e, \share(b, f), f)),
+	\dup(c, e)];
+
+\dup[\apply(a, b), \apply(c, d)] {
+	/* Duplicate application. */
+	++this.total;
+} \apply[\dup(a, c), \dup(b, d)];
+
+\dup[\lambda(a, b), \lambda(c, d)] {
+	/* Duplicate abstraction. */
+	++this.total;
+} \lambda[\dup(a, c), \dup(b, d)];
+
+\dup[a, b] {
+	/* Finish duplication. */
+	++this.total;
+} \dup[a, b];
 
 \erase {
 	/* Erase an atom. */
@@ -312,19 +102,29 @@
 } \atom_{M};
 
 \erase {
+	/* Erase sharing. */
+	++this.total;
+} \share[a, a];
+
+\erase {
 	/* Erase application. */
 	++this.total;
-} \apply_{i}[\erase, \erase];
+} \apply[\erase, \erase];
 
 \erase {
 	/* Erase abstraction. */
 	++this.total;
-} \lambda_{i}[\erase, \erase];
+} \lambda[\erase, \erase];
+
+\erase {
+	/* Erase copy initiator. */
+	++this.total;
+} \copy[\erase, \erase];
 
 \erase {
 	/* Erase duplicator. */
 	++this.total;
-} \fan_{i}[\erase, \erase];
+} \dup[\erase, \erase];
 
 \erase {
 	/* Finish erasing. */
@@ -333,23 +133,12 @@
 
 $$
 
-w4 = \apply_{0}(w5, root);
-w4 = \lambda_{0}(\erase, w6);
-w6 = \atom_{this.mkid("atom")};
-w7 = \apply_{1}(w8, w5);
-w7 = \lambda_{1}(w2, w9);
-w10 = \apply_{1}(w11, w9);
-w12 = \var_{1}(w10);
-w14 = \var_{2}(w11);
-w13 = \box_{1}(w14);
-w2 = \fan_{1}(w13, w12);
-w8 = \lambda_{2}(w3, w15);
-w16 = \apply_{2}(w17, w15);
-w18 = \var_{2}(w16);
-w20 = \var_{3}(w17);
-w19 = \box_{2}(w20);
-w3 = \fan_{2}(w19, w18);
-\eval(\read_{this.mkhole()}(\print)) = root;
+root = \lambda(w1, w3);
+w3 = \apply(w4, w5);
+w4 = \lambda(w2, w6);
+w6 = w2;
+w5 = w1;
+\read_{this.mkhole()}(\print) = root;
 
 $$
 
@@ -420,32 +209,6 @@ function appl(left)
 	return atom(context, obj);
 }
 
-function clone(obj, root, hole)
-{
-	var copy = {};
-
-	if (!obj)
-		return;
-
-	if (!root) {
-		root = copy;
-		hole = obj.hole;
-	}
-
-	copy.node = obj.node;
-	copy.var = obj.var;
-	copy.name = obj.name;
-	copy.body = clone(obj.body, root, hole);
-	copy.left = clone(obj.left, root, hole);
-	copy.right = clone(obj.right, root, hole);
-
-	if (obj === hole)
-		root.hole = copy;
-
-	return copy;
-}
-
-this.clone = clone;
 this.mkid = mkid;
 this.mkvar = mkvar;
 this.mkhole = mkhole;
