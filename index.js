@@ -2,12 +2,49 @@ var mlc2in = require("./encode");
 var inet = require("./agents");
 var fs = require("fs");
 
-var obj2mlc = mlc2in.obj2mlc;
 var example = fs.readFileSync("fact.mlc", "utf8");
 var parser = new inet.Parser();
 var inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
 var typelist, types, ntypes, wiretype, ambtype, table;
 var lpaxtype, rpaxtype;
+
+function obj2mlc(obj)
+{
+	var node = obj.node;
+
+	if ("atom" == node)
+		return obj.name;
+
+	if ("abst" == node) {
+		var body = obj2mlc(obj.body);
+		var sep;
+
+		if ("abst" == obj.body.node)
+			sep = ", ";
+		else
+			sep = ": ";
+
+		return obj.var + sep + body;
+	}
+
+	if ("appl" == node) {
+		var left = obj2mlc(obj.left);
+		var right = obj2mlc(obj.right);
+
+		if ("abst" == obj.left.node)
+			left = "(" + left + ")";
+
+		if ("abst" == obj.right.node)
+			right = "(" + right + ")";
+
+		if ("appl" == obj.right.node)
+			right = "(" + right + ")";
+
+		return left + " " + right;
+	}
+
+	return "[ ]";
+}
 
 function addtypes(tree)
 {
