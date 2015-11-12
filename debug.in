@@ -242,7 +242,7 @@
 
 \print {
 	/* Output results of read-back. */
-	this.nf = this.obj2mlc(M);
+	this.nf = M;
 	++this.total;
 } \atom_{M};
 
@@ -370,7 +370,6 @@ function mkid(name)
 		name: name ? name : mkvar(true)
 	};
 
-	obj.toString = obj2mlc;
 	return obj;
 }
 
@@ -379,7 +378,6 @@ function mkhole()
 	var obj = {};
 
 	obj.hole = obj;
-	obj.toString = obj2mlc;
 	return obj;
 }
 
@@ -444,54 +442,9 @@ function clone(obj, root, hole)
 	if (obj === hole)
 		root.hole = copy;
 
-	copy.toString = obj2mlc;
 	return copy;
 }
 
-function obj2mlc(obj)
-{
-	var node;
-
-	if (!obj)
-		obj = this;
-
-	node = obj.node;
-
-	if ("atom" == node)
-		return obj.name;
-
-	if ("abst" == node) {
-		var body = obj2mlc(obj.body);
-		var sep;
-
-		if ("abst" == obj.body.node)
-			sep = ", ";
-		else
-			sep = ": ";
-
-		return obj.var + sep + body;
-	}
-
-	if ("appl" == node) {
-		var left = obj2mlc(obj.left);
-		var right = obj2mlc(obj.right);
-
-		if ("abst" == obj.left.node)
-			left = "(" + left + ")";
-
-		if ("abst" == obj.right.node)
-			right = "(" + right + ")";
-
-		if ("appl" == obj.right.node)
-			right = "(" + right + ")";
-
-		return left + " " + right;
-	}
-
-	return "[ ]";
-}
-
-this.obj2mlc = obj2mlc;
 this.clone = clone;
 this.mkid = mkid;
 this.mkvar = mkvar;
