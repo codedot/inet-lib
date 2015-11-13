@@ -71,5 +71,5 @@ if (file) {
 	var output = inet(example);
 
 	console.info("%s(%s)", output.total, output.beta);
-	console.log(output.nf);
+	console.log(obj2mlc(output.nf));
 }

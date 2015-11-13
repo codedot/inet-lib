@@ -3,45 +3,7 @@ var compile = require("./compile");
 var parser = new compile.Parser();
 var inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
 var typelist, types, ntypes, wiretype, ambtype, table;
-var lpaxtype, rpaxtype;
-
-function obj2mlc(obj)
-{
-	var node = obj.node;
-
-	if ("atom" == node)
-		return obj.name;
-
-	if ("abst" == node) {
-		var body = obj2mlc(obj.body);
-		var sep;
-
-		if ("abst" == obj.body.node)
-			sep = ", ";
-		else
-			sep = ": ";
-
-		return obj.var + sep + body;
-	}
-
-	if ("appl" == node) {
-		var left = obj2mlc(obj.left);
-		var right = obj2mlc(obj.right);
-
-		if ("abst" == obj.left.node)
-			left = "(" + left + ")";
-
-		if ("abst" == obj.right.node)
-			right = "(" + right + ")";
-
-		if ("appl" == obj.right.node)
-			right = "(" + right + ")";
-
-		return left + " " + right;
-	}
-
-	return "[ ]";
-}
+var lpaxtype, rpaxtype, format;
 
 function addtypes(tree)
 {
@@ -615,9 +577,14 @@ function init()
 	flush(queue);
 }
 
-function prepare(src)
+function prepare(src, fmt)
 {
 	var system = parser.parse(src);
+
+	if (fmt)
+		format = fmt;
+	else
+		format = noformat;
 
 	inverb = system.code;
 	inrules = system.rules;
@@ -666,14 +633,9 @@ function getlist(pax)
 		return "";
 }
 
-function format(data)
+function noformat(data)
 {
-	if ("object" == typeof data)
-		return obj2mlc(data);
-	else if ("number" == typeof data)
-		return data.toString();
-	else
-		return data;
+	return data;
 }
 
 function gettree(agent)
@@ -710,10 +672,10 @@ function gettree(agent)
 	} else {
 		var data = format(agent.data);
 
-		if (data)
-			data = "_{" + data + "}";
-		else
+		if (void(0) == data)
 			data = "";
+		else
+			data = "_{" + data + "}";
 
 		type = typelist[type] + data;
 
@@ -802,7 +764,6 @@ function run(mlc)
 	reduce();
 
 	inenv.stats = getstats();
-	inenv.nf = obj2mlc(inenv.nf);
 	return inenv;
 }
 
