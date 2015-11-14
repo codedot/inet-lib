@@ -51,7 +51,7 @@ cell : '\' NAME {$$ = {agent: $2, code: ""};}
      | '\' NAME '_' CODE {$$ = {agent: $2, code: $4.slice(1, -1)};}
      ;
 init : /* empty */ {$$ = [];}
-     | init tree '=' tree ';' {$1.unshift({left: $2, right: $4}); $$ = $1;}
+     | init tree '=' tree ';' {$1.push({left: $2, right: $4}); $$ = $1;}
      ;
 tail : /* empty */ {$$ = "";}
      | MARK CODE {$$ = $2;}

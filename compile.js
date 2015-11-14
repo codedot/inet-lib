@@ -114,7 +114,7 @@ case 13:
 this.$ = {agent: $$[$0-2], code: $$[$0].slice(1, -1)};
 break;
 case 15:
-$$[$0-4].unshift({left: $$[$0-3], right: $$[$0-1]}); this.$ = $$[$0-4];
+$$[$0-4].push({left: $$[$0-3], right: $$[$0-1]}); this.$ = $$[$0-4];
 break;
 case 16:
 this.$ = "";
