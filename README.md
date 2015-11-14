@@ -12,9 +12,9 @@ side effects written in JavaScript.
 `require("inet-lib")` returns a function of one string argument
 that defines an interaction net to be evaluated.
 When called, the function keeps applying interaction rules until
-its normal form has been reached with no more active pairs left.
-The returned value is a `this` object which all side effects are
-executed with (initialized with `{}` before reduction starts).
+its normal form has been reached with no more active pairs left,
+then returns `this` object which all side effects are executed
+with (initialized to `{}` before reduction starts).
 
 For developing and testing purposes, the package also exports
 two additional functions `.prepare(src, fmt)` and `.debug()`,
@@ -28,11 +28,8 @@ the current interaction net state.
 
 # Grammar
 
-Input consists of three parts separated with the `$$` delimiter:
-interaction rules, initial configuration, and
-optional initial side effect.
-Side effects are written in JavaScript and executed during
-reduction of the interaction net.
+Input consists of three parts: interaction rules,
+initial configuration, and optional initial side effect.
 
 ```
 %token MARK /* "$$" */
@@ -62,7 +59,7 @@ cell : '\' NAME
      | '\' NAME '_' CODE
      ;
 init : /* empty */
-     | tree '=' tree ';' init
+     | init tree '=' tree ';'
      ;
 tail : /* empty */
      | MARK CODE
