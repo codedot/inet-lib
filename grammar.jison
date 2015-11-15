@@ -42,7 +42,7 @@ tree : leaf {$$ = {node: $1, pax: []};}
      | cell '(' list ')' {$$ = {node: $1, pax: $3};}
      ;
 list : tree {$$ = [$1];}
-     | tree ',' list {$3.unshift($1); $$ = $3;}
+     | list ',' tree {$1.push($3); $$ = $1;}
      ;
 leaf : cell
      | NAME {$$ = {agent: "wire", name: $1};}

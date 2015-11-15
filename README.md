@@ -50,7 +50,7 @@ tree : leaf
      | cell '(' list ')'
      ;
 list : tree
-     | tree ',' list
+     | list ',' tree
      ;
 leaf : cell
      | NAME
