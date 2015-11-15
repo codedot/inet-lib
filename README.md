@@ -13,7 +13,7 @@ This engine was previously developed in the context of
 Macro Lambda Calculus (MLC), implementation of call-by-need
 lambda calculus for Web using interaction nets:
 
-https://codedot.github.io/lambda/
+[https://codedot.github.io/lambda/](https://codedot.github.io/lambda/)
 
 Now, MLC uses this package as a low-level programming language
 in order to translate lambda terms into and implement readback
