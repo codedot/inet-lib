@@ -58,14 +58,12 @@ function format(data)
 
 if (file) {
 	var input = fs.readFileSync(file, "utf8");
-	var conf;
+	var eqn;
 
 	inet.prepare(input, format);
 
-	while (conf = inet.debug())
-		console.log("$$\n%s", conf);
-
-	console.log("$$");
+	while (eqn = inet.debug1())
+		console.log(eqn);
 } else {
 	var example = fs.readFileSync("example.in", "utf8");
 	var output = inet(example);
