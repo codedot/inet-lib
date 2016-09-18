@@ -6,6 +6,10 @@ Interaction rules are defined using Yves Lafont's notation.
 Implementation implicitly extends interaction systems with
 McCarthy's _amb_ as a nondeterministic agent and also allows
 side effects written in JavaScript.
+A rather informal brief introduction to interaction nets and
+their textual representation called the interaction calculus
+can be found in Section 2 of
+[10.4204/EPTCS.225.7](http://dx.doi.org/10.4204/EPTCS.225.7).
 
 # Demo
 
