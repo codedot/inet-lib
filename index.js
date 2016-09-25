@@ -25,20 +25,36 @@ function addtypes(tree)
 		addtypes(pax[i]);
 }
 
-function norule(lagent, ragent)
+function norules(lagent, ragent)
 {
-	var ltype = typelist[lagent.type];
-	var rtype = typelist[ragent.type];
-	var pair = ltype + "><" + rtype;
+	var eqn = geteqn({
+		left: lagent,
+		right: ragent
+	});
 
-	console.error("%s: No applicable rule", pair);
+	console.error("NO RULES: %s", eqn);
 	inqueue = [];
+}
+
+function scan(wire, agent)
+{
+	return false;
 }
 
 function detect(wire, agent)
 {
 	if (ndebug)
 		return;
+
+	if (scan(wire, agent)) {
+		var eqn = geteqn({
+			left: wire,
+			right: agent
+		});
+
+		console.error("DEADLOCK: %s", eqn);
+		inqueue = [];
+	}
 }
 
 function indwire(wire, agent)
@@ -434,7 +450,7 @@ function gettable()
 				else if ("amb" == right)
 					rules = mreted;
 				else
-					rules = norule;
+					rules = norules;
 			}
 
 			row[types[right]] = rules;
@@ -466,7 +482,7 @@ function traverse(pair)
 		}
 	}
 
-	norule(left, right);
+	norules(left, right);
 }
 
 function reduce()
@@ -610,7 +626,7 @@ function prepare(src, fmt)
 	nwires = 0;
 	nambs = 0;
 
-	norule.pseudo = true;
+	norules.pseudo = true;
 	determ.pseudo = true;
 	mreted.pseudo = true;
 	indwire.pseudo = true;
