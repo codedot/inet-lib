@@ -763,6 +763,18 @@ function debug()
 	return conf;
 }
 
+function debug0()
+{
+	var pair = inqueue.shift();
+
+	if (pair) {
+		traverse(pair);
+		return true;
+	}
+
+	return false;
+}
+
 function debug1()
 {
 	var pair = inqueue.shift();
@@ -828,5 +840,6 @@ function run(src)
 
 run.prepare = prepare;
 run.debug = debug;
+run.debug0 = debug0;
 run.debug1 = debug1;
 module.exports = run;
