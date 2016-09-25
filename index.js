@@ -3,7 +3,7 @@ var compile = require("./compile");
 var parser = new compile.Parser();
 var inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
 var typelist, types, ntypes, wiretype, ambtype, table;
-var lpaxtype, rpaxtype, format;
+var lpaxtype, rpaxtype, format, ndebug;
 
 function addtypes(tree)
 {
@@ -35,6 +35,12 @@ function norule(lagent, ragent)
 	inqueue = [];
 }
 
+function detect(wire, agent)
+{
+	if (ndebug)
+		return;
+}
+
 function indwire(wire, agent)
 {
 	var dst = wire.twin;
@@ -54,6 +60,8 @@ function indamb(wire, agent)
 	var dst = wire.twin;
 	var twin = agent.twin;
 
+	detect(dst, agent);
+
 	dst.twin = twin;
 	twin.twin = dst;
 
@@ -70,6 +78,8 @@ function indbma(agent, wire)
 function indagent(wire, agent)
 {
 	var dst = wire.twin;
+
+	detect(dst, agent);
 
 	dst.type = agent.type;
 	dst.pax = agent.pax;
@@ -773,9 +783,10 @@ function getstats()
 
 function run(src)
 {
+	ndebug = true;
 	prepare(src);
-
 	reduce();
+	ndebug = false;
 
 	inenv.stats = getstats();
 	return inenv;
