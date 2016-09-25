@@ -771,9 +771,9 @@ function getstats()
 	return stats;
 }
 
-function run(mlc)
+function run(src)
 {
-	prepare(mlc);
+	prepare(src);
 
 	reduce();
 
