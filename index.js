@@ -32,8 +32,7 @@ function norules(lagent, ragent)
 		right: ragent
 	});
 
-	console.error("NO RULES: %s", eqn);
-	inqueue = [];
+	throw "NO RULES: " + eqn;
 }
 
 function ischild(wire, agent)
@@ -72,8 +71,7 @@ function detect(wire, agent)
 			right: agent
 		});
 
-		console.error("DEADLOCK: %s", eqn);
-		inqueue = [];
+		throw "DEADLOCK: " + eqn;
 	}
 }
 
