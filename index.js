@@ -36,8 +36,28 @@ function norules(lagent, ragent)
 	inqueue = [];
 }
 
-function scan(wire, agent)
+function ischild(wire, agent)
 {
+	var type = agent.type;
+
+	if (wiretype == type) {
+		if (wire === agent)
+			return true;
+	} else if (ambtype == type) {
+		if (ischild(wire, agent.main))
+			return true;
+
+		if (ischild(wire, agent.aux))
+			return true;
+	} else {
+		var pax = agent.pax;
+		var i;
+
+		for (i = 0; i < pax.length; i++)
+			if (ischild(wire, pax[i]))
+				return true;
+	}
+
 	return false;
 }
 
@@ -46,7 +66,7 @@ function detect(wire, agent)
 	if (ndebug)
 		return;
 
-	if (scan(wire, agent)) {
+	if (ischild(wire, agent)) {
 		var eqn = geteqn({
 			left: wire,
 			right: agent
