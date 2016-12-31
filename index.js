@@ -621,7 +621,7 @@ function init()
 	flush(queue);
 }
 
-function prepare(src, fmt)
+function prepare(src, fmt, deadlock)
 {
 	var system = parser.parse(src);
 
@@ -630,6 +630,7 @@ function prepare(src, fmt)
 	else
 		format = noformat;
 
+	ndebug = !deadlock;
 	inverb = system.code;
 	inrules = system.rules;
 	inconf = system.conf;
@@ -829,10 +830,8 @@ function getstats()
 
 function run(src)
 {
-	ndebug = true;
 	prepare(src);
 	reduce();
-	ndebug = false;
 
 	inenv.stats = getstats();
 	return inenv;
