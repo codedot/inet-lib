@@ -1,17 +1,12 @@
-JISON = node_modules/.bin/jison
-
 all: compile.js
-	node test.js debug.in
-	time -p node test.js
+	node test debug.in
+	time -p node test
 
 compile.js: grammar.jison
-	$(MAKE) $(JISON)
-	$(JISON) $< -o $*.tmp -m js
+	npm install jison@0.4.15
+	node_modules/.bin/jison $< -o $*.tmp -m js
 	printf '\nmodule.exports = parser;\n' >>$*.tmp
 	mv $*.tmp $@
-
-$(JISON):
-	npm install jison
 
 clean:
 	-rm -f *.tmp
