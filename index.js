@@ -672,6 +672,8 @@ function prepare(src, fmt, deadlock)
 	table = gettable();
 
 	init();
+
+	return inenv;
 }
 
 function getlist(pax)
