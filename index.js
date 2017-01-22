@@ -841,9 +841,15 @@ function getstats()
 
 function run(src, max)
 {
-	prepare(src);
-	reduce(max);
+	var t0, t1;
 
+	prepare(src);
+
+	t0 = Date.now();
+	reduce(max);
+	t1 = Date.now();
+
+	inenv.redtime = t1 - t0;
 	inenv.stats = getstats();
 	return inenv;
 }
@@ -852,4 +858,5 @@ run.prepare = prepare;
 run.debug = debug;
 run.debug0 = debug0;
 run.debug1 = debug1;
+
 module.exports = run;

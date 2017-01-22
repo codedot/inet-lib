@@ -1,6 +1,6 @@
 all: compile.js
 	node test debug.in
-	time -p node test
+	node test
 
 compile.js: grammar.jison
 	npm install jison@0.4.15

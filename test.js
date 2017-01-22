@@ -67,7 +67,11 @@ if (file) {
 } else {
 	var example = fs.readFileSync("example.in", "utf8");
 	var output = inet(example);
+	var total = output.total;
+	var beta = output.beta;
+	var redtime = output.redtime;
+	var nf = obj2mlc(output.nf);
 
-	console.info("%s(%s)", output.total, output.beta);
-	console.log(obj2mlc(output.nf));
+	console.info("%s(%s), %s ms", total, beta, redtime);
+	console.log(nf);
 }
