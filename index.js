@@ -1,33 +1,34 @@
-var compile = require("./compile");
+"use strict";
 
-var parser = new compile.Parser();
-var inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
-var typelist, types, ntypes, wiretype, ambtype, table;
-var lpaxtype, rpaxtype, format, ndebug;
+const compile = require("./compile");
+
+const parser = new compile.Parser();
+
+let inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
+let typelist, types, ntypes, wiretype, ambtype, table;
+let lpaxtype, rpaxtype, format, ndebug;
 
 function addtypes(tree)
 {
-	var node = tree.node;
-	var pax = tree.pax;
-	var agent = node.agent;
-	var type = types[agent];
-	var i;
+	const agent = tree.node.agent;
+	const pax = tree.pax;
+	const plen = pax.length;
 
 	if ("wire" == agent)
 		return;
 
-	if (!type) {
+	if (!types[agent]) {
 		types[agent] = ntypes;
 		++ntypes;
 	}
 
-	for (i = 0; i < pax.length; i++)
+	for (let i = 0; i < plen; i++)
 		addtypes(pax[i]);
 }
 
 function norules(lagent, ragent)
 {
-	var eqn = geteqn({
+	const eqn = geteqn({
 		left: lagent,
 		right: ragent
 	});
@@ -37,7 +38,7 @@ function norules(lagent, ragent)
 
 function ischild(wire, agent)
 {
-	var type = agent.type;
+	const type = agent.type;
 
 	if (wiretype == type) {
 		if (wire === agent)
@@ -49,10 +50,10 @@ function ischild(wire, agent)
 		if (ischild(wire, agent.aux))
 			return true;
 	} else {
-		var pax = agent.pax;
-		var i;
+		const pax = agent.pax;
+		const plen = pax.length;
 
-		for (i = 0; i < pax.length; i++)
+		for (let i = 0; i < plen; i++)
 			if (ischild(wire, pax[i]))
 				return true;
 	}
@@ -66,7 +67,7 @@ function detect(wire, agent)
 		return;
 
 	if (ischild(wire, agent)) {
-		var eqn = geteqn({
+		const eqn = geteqn({
 			left: wire,
 			right: agent
 		});
@@ -77,8 +78,8 @@ function detect(wire, agent)
 
 function indwire(wire, agent)
 {
-	var dst = wire.twin;
-	var twin = agent.twin;
+	const dst = wire.twin;
+	const twin = agent.twin;
 
 	dst.twin = twin;
 	twin.twin = dst;
@@ -91,8 +92,8 @@ function inderiw(agent, wire)
 
 function indamb(wire, agent)
 {
-	var dst = wire.twin;
-	var twin = agent.twin;
+	const dst = wire.twin;
+	const twin = agent.twin;
 
 	detect(dst, agent);
 
@@ -111,7 +112,7 @@ function indbma(agent, wire)
 
 function indagent(wire, agent)
 {
-	var dst = wire.twin;
+	const dst = wire.twin;
 
 	detect(dst, agent);
 
@@ -147,19 +148,19 @@ function getridni(type)
 
 function determ(amb, agent)
 {
-	var dst = amb.twin;
-	var aux = amb.aux;
-	var type = aux.type;
+	const dst = amb.twin;
+	const aux = amb.aux;
+	const type = aux.type;
 
 	if (wiretype == type) {
-		var twin = aux.twin;
+		const twin = aux.twin;
 
 		dst.twin = twin;
 		twin.twin = dst;
 
 		dst.type = type;
 	} else if (ambtype == type) {
-		var twin = aux.twin;
+		const twin = aux.twin;
 
 		dst.twin = twin;
 		twin.twin = dst;
@@ -185,7 +186,7 @@ function mreted(agent, amb)
 
 function mkeffect(lval, rval, code, expr)
 {
-	var body = expr ? "return (%s);" : "%s\n\treturn true;";
+	let body = expr ? "return (%s);" : "%s\n\treturn true;";
 
 	if (!lval)
 		lval = "LVAL";
@@ -200,10 +201,10 @@ function mkeffect(lval, rval, code, expr)
 
 function prequeue(queue, side, lval, rval, pax, wires)
 {
-	var i;
+	const plen = pax.length;
 
-	for (i = 0; i < pax.length; i++) {
-		var img = encode(lval, rval, pax[i], wires);
+	for (let i = 0; i < plen; i++) {
+		const img = encode(lval, rval, pax[i], wires);
 
 		queue.push({
 			left: {
@@ -217,14 +218,14 @@ function prequeue(queue, side, lval, rval, pax, wires)
 
 function optimize(queue)
 {
-	var needed = [];
-	var i;
+	const needed = [];
+	const qlen = queue.length;
 
-	for (i = 0; i < queue.length; i++) {
-		var pair = queue[i];
-		var pax = pair.left;
-		var wire = pair.right;
-		var twin = wire.twin;
+	for (let i = 0; i < qlen; i++) {
+		const pair = queue[i];
+		const pax = pair.left;
+		const wire = pair.right;
+		const twin = wire.twin;
 
 		if (wiretype != wire.type) {
 			needed.push(pair);
@@ -249,38 +250,39 @@ function geneff(effect)
 
 function gentwins(wlist, alist)
 {
-	var head = "";
-	var tail = "";
-	var i;
+	const wlen = wlist.length;
+	const alen = alist.length;
+	let head = "";
+	let tail = "";
 
 	if (!wlist.length)
 		return "";
 
-	for (i = 0; i < wlist.length; i++) {
-		var wire = wlist[i];
-		var type = wire.type;
-		var twin = wire.twin.id;
+	for (let i = 0; i < wlen; i++) {
+		const wire = wlist[i];
+		const type = wire.type;
+		const twin = wire.twin.id;
 
 		head = head.concat("\
-	var wire" + i + " = {type: " + type + "};\n");
+	const wire" + i + " = {type: " + type + "};\n");
 
 		tail = tail.concat("\
 	wire" + i + ".twin = wire" + twin + ";\n");
 	}
 
-	for (i = 0; i < alist.length; i++) {
-		var tree = alist[i];
+	for (let i = 0; i < alen; i++) {
+		const tree = alist[i];
 
 		head = head.concat("\
-	var tree" + i + " = " + genclone(tree) + ";\n");
+	const tree" + i + " = " + genclone(tree) + ";\n");
 	}
 
-	for (i = 0; i < wlist.length; i++) {
-		var wire = wlist[i];
+	for (let i = 0; i < wlen; i++) {
+		const wire = wlist[i];
 
 		if (ambtype == wire.type) {
-			var main = wire.main;
-			var aux = wire.aux;
+			const main = wire.main;
+			const aux = wire.aux;
 
 			tail = tail.concat("\
 	wire" + i + ".main = tree" + main + ";\n\
@@ -293,10 +295,10 @@ function gentwins(wlist, alist)
 
 function genclone(img)
 {
-	var type = img.type;
-	var imgpax = img.pax;
-	var pax = [];
-	var i;
+	const type = img.type;
+	const imgpax = img.pax;
+	const pax = [];
+	let iplen;
 
 	if (lpaxtype == type)
 		return "lpax[" + img.id + "]";
@@ -310,7 +312,8 @@ function genclone(img)
 	if (ambtype == type)
 		return "wire" + img.id;
 
-	for (i = 0; i < imgpax.length; i++)
+	iplen = imgpax.length;
+	for (let i = 0; i < iplen; i++)
 		pax[i] = genclone(imgpax[i]);
 
 	return "{\n\
@@ -322,13 +325,13 @@ function genclone(img)
 
 function genqueue(img)
 {
-	var queue = [];
-	var i;
+	const queue = [];
+	const ilen = img.length;
 
-	for (i = 0; i < img.length; i++) {
-		var pair = img[i];
-		var left = pair.left;
-		var right = pair.right;
+	for (let i = 0; i < ilen; i++) {
+		const pair = img[i];
+		const left = pair.left;
+		const right = pair.right;
 
 		queue.push("{\n\
 		left: " + genclone(left) + ",\n\
@@ -341,15 +344,16 @@ function genqueue(img)
 
 function generate(img, wlist, alist, effect, rl)
 {
-	var left = rl ? "right" : "left";
-	var right = rl ? "left" : "right";
-	var body = "\
-	var lval = " + left + ".data;\n\
-	var rval = " + right + ".data;\n\n\
+	const left = rl ? "right" : "left";
+	const right = rl ? "left" : "right";
+	const body = "\
+	const lval = " + left + ".data;\n\
+	const rval = " + right + ".data;\n\n\
 	if (!(" + geneff(effect) + "))\n\
 		return;\n\n\
-	var lpax = left.pax;\n\
-	var rpax = right.pax;\n\n" + gentwins(wlist, alist) + "\
+	const lpax = left.pax;\n\
+	const rpax = right.pax;\n\n\
+	" + gentwins(wlist, alist) + "\
 	return " + genqueue(img) + ";";
 
 	return new Function("left", "right", body);
@@ -357,26 +361,26 @@ function generate(img, wlist, alist, effect, rl)
 
 function apply(left, right, code, rl)
 {
-	var lnode = left.node;
-	var rnode = right.node;
-	var human = lnode.agent + "><" + rnode.agent;
-	var lval = rl ? rnode.code : lnode.code;
-	var rval = rl ? lnode.code : rnode.code;
-	var effect = mkeffect(lval, rval, code);
-	var img = [];
-	var wires = {};
-	var wlist = [];
-	var alist = [];
-	var i, name, interact;
+	const lnode = left.node;
+	const rnode = right.node;
+	const human = lnode.agent + "><" + rnode.agent;
+	const lval = rl ? rnode.code : lnode.code;
+	const rval = rl ? lnode.code : rnode.code;
+	const effect = mkeffect(lval, rval, code);
+	const img = [];
+	const wires = {};
+	const wlist = [];
+	const alist = [];
+	let oimg, interact;
 
 	prequeue(img, lpaxtype, lval, rval, left.pax, wires);
 	prequeue(img, rpaxtype, lval, rval, right.pax, wires);
 
-	img = optimize(img);
+	oimg = optimize(img);
 
-	for (name in wires) {
-		var wire = wires[name];
-		var twin = wire.twin;
+	for (const name in wires) {
+		const wire = wires[name];
+		const twin = wire.twin;
 
 		if (wire.junk)
 			continue;
@@ -388,8 +392,8 @@ function apply(left, right, code, rl)
 		wlist.push(twin);
 
 		if (ambtype == wire.type) {
-			var main = wire.main;
-			var aux = wire.aux;
+			const main = wire.main;
+			const aux = wire.aux;
 
 			wire.main = alist.length;
 			twin.main = alist.length;
@@ -401,7 +405,7 @@ function apply(left, right, code, rl)
 		}
 	}
 
-	interact = generate(img, wlist, alist, effect, rl);
+	interact = generate(oimg, wlist, alist, effect, rl);
 	interact.human = human;
 	interact.count = 0;
 	return interact;
@@ -409,29 +413,28 @@ function apply(left, right, code, rl)
 
 function addrule(dict, rule)
 {
-	var human = rule.human;
-	var entry = dict[human];
+	const human = rule.human;
+	const entry = dict[human];
 
-	if (!entry) {
-		entry = [];
-		dict[human] = entry;
-	}
-
-	entry.push(rule);
+	if (entry)
+		entry.push(rule);
+	else
+		dict[human] = [rule];
 }
 
 function gettable()
 {
-	var tab = [];
-	var custom = {};
-	var left, right, type;
+	const tab = [];
+	const custom = {};
+	const rlen = inrules.length;
+	const clen = inconf.length;
 
-	for (i = 0; i < inrules.length; i++) {
-		var rule = inrules[i];
-		var left = rule.left;
-		var right = rule.right;
-		var code = rule.code;
-		var lrfunc, rlfunc;
+	for (let i = 0; i < rlen; i++) {
+		const rule = inrules[i];
+		const left = rule.left;
+		const right = rule.right;
+		const code = rule.code;
+		let lrfunc, rlfunc;
 
 		addtypes(left);
 		addtypes(right);
@@ -443,20 +446,20 @@ function gettable()
 		addrule(custom, rlfunc);
 	}
 
-	for (i = 0; i < inconf.length; i++) {
-		var eqn = inconf[i];
-		var left = eqn.left;
-		var right = eqn.right;
+	for (let i = 0; i < clen; i++) {
+		const eqn = inconf[i];
+		const left = eqn.left;
+		const right = eqn.right;
 
 		addtypes(left);
 		addtypes(right);
 	}
 
-	for (left in types) {
-		var row = [];
+	for (const left in types) {
+		const row = [];
 
-		for (right in types) {
-			var rules = custom[left + "><" + right];
+		for (const right in types) {
+			let rules = custom[left + "><" + right];
 
 			if (!rules) {
 				if ("wire" == left)
@@ -484,14 +487,14 @@ function gettable()
 
 function traverse(pair)
 {
-	var left = pair.left;
-	var right = pair.right;
-	var rules = pair.rules;
-	var i;
+	const left = pair.left;
+	const right = pair.right;
+	const rules = pair.rules;
+	const rlen = rules.length;
 
-	for (i = 0; i < rules.length; i++) {
-		var rule = rules[i];
-		var queue = rule.call(inenv, left, right);
+	for (let i = 0; i < rlen; i++) {
+		const rule = rules[i];
+		const queue = rule.call(inenv, left, right);
 
 		if (queue) {
 			++rule.count;
@@ -505,13 +508,11 @@ function traverse(pair)
 
 function reduce(max)
 {
-	var i;
-
 	if (!max)
 		max = 1e7;
 
-	for (i = 0; i < max; i++) {
-		var pair = inqueue.shift();
+	for (let i = 0; i < max; i++) {
+		const pair = inqueue.shift();
 
 		if (!pair)
 			break;
@@ -522,14 +523,14 @@ function reduce(max)
 
 function flush(queue)
 {
-	var i;
+	const qlen = queue.length;
 
-	for (i = 0; i < queue.length; i++) {
-		var pair = queue[i];
-		var left = pair.left;
-		var right = pair.right;
-		var row = table[left.type];
-		var rules = row[right.type];
+	for (let i = 0; i < qlen; i++) {
+		const pair = queue[i];
+		const left = pair.left;
+		const right = pair.right;
+		const row = table[left.type];
+		const rules = row[right.type];
 
 		pair.rules = rules;
 
@@ -542,29 +543,28 @@ function flush(queue)
 
 function encode(lval, rval, tree, wires, rt)
 {
-	var node = tree.node;
-	var code = node.code;
-	var agent = node.agent;
-	var type = types[agent];
-	var pax = tree.pax;
-	var imgpax = [];
-	var i;
+	const node = tree.node;
+	const code = node.code;
+	const agent = node.agent;
+	const type = types[agent];
+	const pax = tree.pax;
+	const plen = pax.length;
+	const imgpax = [];
 
-	for (i = 0; i < pax.length; i++) {
-		var sub = pax[i];
+	for (let i = 0; i < plen; i++) {
+		const sub = pax[i];
 
 		imgpax[i] = encode(lval, rval, sub, wires, rt);
 	}
 
-	pax = imgpax;
 	tree = {
 		type: type,
 		pax: imgpax
 	};
 
 	if (wiretype == type) {
-		var name = node.name;
-		var wire = wires[name];
+		const name = node.name;
+		const wire = wires[name];
 
 		if (wire) {
 			wire.twin = tree;
@@ -579,10 +579,10 @@ function encode(lval, rval, tree, wires, rt)
 
 		wires[name] = tree;
 	} else if (ambtype == type) {
-		var wire = pax.shift();
-		var twin = wire.twin;
-		var main = pax.shift();
-		var aux = pax.shift();
+		const wire = imgpax.shift();
+		const twin = wire.twin;
+		const main = imgpax.shift();
+		const aux = imgpax.shift();
 
 		wire.type = type;
 		wire.main = main;
@@ -596,7 +596,7 @@ function encode(lval, rval, tree, wires, rt)
 
 		return wire;
 	} else {
-		var effect = mkeffect(lval, rval, code, true);
+		const effect = mkeffect(lval, rval, code, true);
 
 		if (rt)
 			tree.data = effect.call(inenv);
@@ -609,17 +609,17 @@ function encode(lval, rval, tree, wires, rt)
 
 function init()
 {
-	var wires = {};
-	var queue = [];
-	var effect = mkeffect(0, 0, inverb);
-	var i;
+	const wires = {};
+	const queue = [];
+	const effect = mkeffect(0, 0, inverb);
+	const clen = inconf.length;
 
 	effect.call(inenv);
 
-	for (i = 0; i < inconf.length; i++) {
-		var eqn = inconf[i];
-		var left = eqn.left;
-		var right = eqn.right;
+	for (let i = 0; i < clen; i++) {
+		const eqn = inconf[i];
+		const left = eqn.left;
+		const right = eqn.right;
 
 		queue.push({
 			left: encode(0, 0, left, wires, true),
@@ -632,7 +632,7 @@ function init()
 
 function prepare(src, fmt, deadlock)
 {
-	var system = parser.parse(src);
+	const system = parser.parse(src);
 
 	if (fmt)
 		format = fmt;
@@ -678,11 +678,7 @@ function prepare(src, fmt, deadlock)
 
 function getlist(pax)
 {
-	var list = [];
-	var i;
-
-	for (i = 0; i < pax.length; i++)
-		list[i] = gettree(pax[i]);
+	const list = pax.map(gettree);
 
 	if (list.length)
 		return "(" + list.join(", ") + ")";
@@ -697,8 +693,8 @@ function noformat(data)
 
 function gettree(agent)
 {
-	var type = agent.type;
-	var human;
+	const type = agent.type;
+	let human;
 
 	if (wiretype == type) {
 		human = agent.human;
@@ -711,8 +707,8 @@ function gettree(agent)
 
 		agent.twin.human = human;
 	} else if (ambtype == type) {
-		var index = agent.index;
-		var list = "";
+		let index = agent.index;
+		let list = "";
 
 		if (!index || (nambs < index)) {
 			++nambs;
@@ -727,16 +723,17 @@ function gettree(agent)
 
 		human = "\\amb#" + index + list;
 	} else {
-		var data = format(agent.data);
+		let data = format(agent.data);
+		let cell;
 
 		if (void(0) == data)
 			data = "";
 		else
 			data = "_{" + data + "}";
 
-		type = typelist[type] + data;
+		cell = typelist[type] + data;
 
-		human = "\\" + type + getlist(agent.pax);
+		human = "\\" + cell + getlist(agent.pax);
 	}
 
 	return human;
@@ -744,31 +741,23 @@ function gettree(agent)
 
 function geteqn(pair)
 {
-	var left = gettree(pair.left);
-	var right = gettree(pair.right);
+	const left = gettree(pair.left);
+	const right = gettree(pair.right);
 
 	return left + " = " + right + ";";
 }
 
 function getconf()
 {
-	var list = [];
-	var i;
-
 	nambs = 0;
-
-	for (i = 0; i < inqueue.length; i++)
-		list[i] = geteqn(inqueue[i]);
-
-	return list.join("\n");
+	return inqueue.map(geteqn).join("\n");
 }
 
 function debug()
 {
-	var conf = getconf();
-	var pair;
+	const conf = getconf();
+	const pair = inqueue.shift();
 
-	pair = inqueue.shift();
 	if (pair)
 		traverse(pair);
 
@@ -777,7 +766,7 @@ function debug()
 
 function debug0()
 {
-	var pair = inqueue.shift();
+	const pair = inqueue.shift();
 
 	if (pair) {
 		traverse(pair);
@@ -789,37 +778,36 @@ function debug0()
 
 function debug1()
 {
-	var pair = inqueue.shift();
-	var eqn;
+	const pair = inqueue.shift();
 
 	if (pair) {
-		eqn = geteqn(pair);
-		traverse(pair);
-	}
+		const eqn = geteqn(pair);
 
-	return eqn;
+		traverse(pair);
+		return eqn;
+	}
 }
 
 function getstats()
 {
-	var stats = {};
-	var i;
+	const stats = {};
+	const tlen = table.length;
 
-	for (i = 0; i < table.length; i++) {
-		var row = table[i];
-		var j;
+	for (let i = 0; i < tlen; i++) {
+		const row = table[i];
+		const rlen = row.length;
 
-		for (j = 0; j < row.length; j++) {
-			var cell = row[j];
-			var k;
+		for (let j = 0; j < rlen; j++) {
+			const cell = row[j];
+			const clen = cell.length;
 
 			if (cell.pseudo)
 				continue;
 
-			for (k = 0; k < cell.length; k++) {
-				var rule = cell[k];
-				var count = rule.count;
-				var human = rule.human;
+			for (let k = 0; k < clen; k++) {
+				const rule = cell[k];
+				const count = rule.count;
+				let human = rule.human;
 
 				if (!count)
 					continue;
@@ -841,7 +829,7 @@ function getstats()
 
 function run(src, max)
 {
-	var t0, t1;
+	let t0, t1;
 
 	prepare(src);
 
