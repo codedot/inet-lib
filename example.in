@@ -680,7 +680,7 @@ w434 = \lambda_{1}(\erase, w435);
 w70 = \var_{1}(w435);
 w74 = \lambda_{1}(w72, w436);
 w72 = \var_{1}(w436);
-\eval(\read_{this.mkhole()}(\print)) = root;
+\eval(\read_{this.mkhole()}(!print)) = root;
 
 $$
 

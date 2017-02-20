@@ -71,8 +71,11 @@ list : tree
 leaf : cell
      | NAME
      ;
-cell : '\' NAME
-     | '\' NAME '_' CODE
+cell : need NAME
+     | need NAME '_' CODE
+     ;
+need : '!'
+     | '\'
      ;
 init : /* empty */
      | init tree '=' tree ';'

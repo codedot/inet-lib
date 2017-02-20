@@ -20,6 +20,7 @@
 "(" return "(";
 ")" return ")";
 "," return ",";
+"!" return "!";
 "\\" return "\\";
 "_" return "_";
 <CONF>"=" return "=";
@@ -47,8 +48,11 @@ list : tree {$$ = [$1];}
 leaf : cell
      | NAME {$$ = {agent: "wire", name: $1};}
      ;
-cell : '\' NAME {$$ = {agent: $2, code: ""};}
-     | '\' NAME '_' CODE {$$ = {agent: $2, code: $4.slice(1, -1)};}
+cell : need NAME {$$ = {agent: $2, need: $1, code: ""};}
+     | need NAME '_' CODE {$$ = {agent: $2, need: $1, code: $4.slice(1, -1)};}
+     ;
+need : '!' {$$ = true;}
+     | '\' {$$ = false;}
      ;
 init : /* empty */ {$$ = [];}
      | init tree '=' tree ';' {$1.push({left: $2, right: $4}); $$ = $1;}

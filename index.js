@@ -707,6 +707,7 @@ function gettree(agent)
 
 		agent.twin.human = human;
 	} else if (ambtype == type) {
+		const need = agent.need ? "!" : "\\";
 		let index = agent.index;
 		let list = "";
 
@@ -721,8 +722,9 @@ function gettree(agent)
 			]);
 		}
 
-		human = "\\amb#" + index + list;
+		human = need + "amb#" + index + list;
 	} else {
+		const need = agent.need ? "!" : "\\";
 		let data = format(agent.data);
 		let cell;
 
@@ -733,7 +735,7 @@ function gettree(agent)
 
 		cell = typelist[type] + data;
 
-		human = "\\" + cell + getlist(agent.pax);
+		human = need + cell + getlist(agent.pax);
 	}
 
 	return human;

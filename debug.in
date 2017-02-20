@@ -138,7 +138,7 @@ w3 = \apply(w4, w5);
 w4 = \lambda(w2, w6);
 w6 = w2;
 w5 = w1;
-\read_{this.mkhole()}(\print) = root;
+\read_{this.mkhole()}(!print) = root;
 
 $$
 
