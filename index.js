@@ -5,7 +5,7 @@ const compile = require("./compile");
 const parser = new compile.Parser();
 
 let inenv, inqueue, nwires, nambs;
-let typelist, types, ntypes, table;
+let typelist, types, table;
 let format, ndebug;
 
 const ambtype = 1;
@@ -23,8 +23,8 @@ function addtypes(tree)
 		return;
 
 	if (!types[agent]) {
-		types[agent] = ntypes;
-		++ntypes;
+		types[agent] = typelist.length;
+		typelist.push(agent);
 	}
 
 	for (let i = 0; i < plen; i++)
@@ -490,8 +490,6 @@ function setup(src)
 		}
 
 		table[types[left]] = row;
-
-		typelist[types[left]] = left;
 	}
 
 	effect.call(inenv);
@@ -627,12 +625,14 @@ function prepare(src, fmt, deadlock)
 	ndebug = !deadlock;
 	inenv = run.inenv;
 	inqueue = [];
-	typelist = [];
+	typelist = [
+		"wire",
+		"amb"
+	];
 	types = {
 		wire: wiretype,
 		amb: ambtype
 	};
-	ntypes = 2;
 	nwires = 0;
 	nambs = 0;
 
