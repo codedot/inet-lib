@@ -4,14 +4,12 @@ const compile = require("./compile");
 
 const parser = new compile.Parser();
 
-let inenv, inqueue, nwires, nambs;
-let typelist, types, table;
-let format, ndebug;
-
 const ambtype = 1;
 const wiretype = 0;
 const lpaxtype = -1;
 const rpaxtype = -2;
+
+let inenv, inqueue, nwires, nambs, typelist, types, table, infmt;
 
 function addtypes(tree)
 {
@@ -41,46 +39,6 @@ function norules(lagent, ragent)
 	throw "NO RULES: " + eqn;
 }
 
-function ischild(wire, agent)
-{
-	const type = agent.type;
-
-	if (wiretype == type) {
-		if (wire === agent)
-			return true;
-	} else if (ambtype == type) {
-		if (ischild(wire, agent.main))
-			return true;
-
-		if (ischild(wire, agent.aux))
-			return true;
-	} else {
-		const pax = agent.pax;
-		const plen = pax.length;
-
-		for (let i = 0; i < plen; i++)
-			if (ischild(wire, pax[i]))
-				return true;
-	}
-
-	return false;
-}
-
-function detect(wire, agent)
-{
-	if (ndebug)
-		return;
-
-	if (ischild(wire, agent)) {
-		const eqn = geteqn({
-			left: wire,
-			right: agent
-		});
-
-		throw "DEADLOCK: " + eqn;
-	}
-}
-
 function indwire(wire, agent)
 {
 	const dst = wire.twin;
@@ -100,8 +58,6 @@ function indamb(wire, agent)
 	const dst = wire.twin;
 	const twin = agent.twin;
 
-	detect(dst, agent);
-
 	dst.twin = twin;
 	twin.twin = dst;
 
@@ -118,8 +74,6 @@ function indbma(agent, wire)
 function indagent(wire, agent)
 {
 	const dst = wire.twin;
-
-	detect(dst, agent);
 
 	dst.type = agent.type;
 	dst.pax = agent.pax;
@@ -615,14 +569,13 @@ function encode(lval, rval, tree, wires, rt)
 	return tree;
 }
 
-function prepare(src, fmt, deadlock)
+function prepare(src, fmt)
 {
 	if (fmt)
-		format = fmt;
+		infmt = fmt;
 	else
-		format = noformat;
+		infmt = nofmt;
 
-	ndebug = !deadlock;
 	inenv = run.inenv;
 	inqueue = [];
 	typelist = [
@@ -661,7 +614,7 @@ function getlist(pax)
 		return "";
 }
 
-function noformat(data)
+function nofmt(data)
 {
 	return data;
 }
@@ -700,7 +653,7 @@ function gettree(agent)
 		human = need + "amb#" + index + list;
 	} else {
 		const need = agent.need ? "!" : "\\";
-		let data = format(agent.data);
+		let data = infmt(agent.data);
 		let cell;
 
 		if (void(0) == data)
