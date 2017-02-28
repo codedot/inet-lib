@@ -422,12 +422,19 @@ function addrule(dict, rule)
 		dict[human] = [rule];
 }
 
-function gettable(inconf, inrules)
+function setup(src)
 {
-	const tab = [];
-	const custom = {};
+	const system = parser.parse(src);
+	const inrules = system.rules;
+	const inconf = system.conf;
 	const rlen = inrules.length;
 	const clen = inconf.length;
+	const custom = {};
+	const wires = {};
+	const queue = [];
+	const effect = mkeffect(0, 0, system.code);
+
+	table = [];
 
 	for (let i = 0; i < rlen; i++) {
 		const rule = inrules[i];
@@ -477,12 +484,25 @@ function gettable(inconf, inrules)
 			row[types[right]] = rules;
 		}
 
-		tab[types[left]] = row;
+		table[types[left]] = row;
 
 		typelist[types[left]] = left;
 	}
 
-	return tab;
+	effect.call(inenv);
+
+	for (let i = 0; i < clen; i++) {
+		const eqn = inconf[i];
+		const left = eqn.left;
+		const right = eqn.right;
+
+		queue.push({
+			left: encode(0, 0, left, wires, true),
+			right: encode(0, 0, right, wires, true)
+		});
+	}
+
+	flush(queue);
 }
 
 function reduce(pair)
@@ -592,33 +612,8 @@ function encode(lval, rval, tree, wires, rt)
 	return tree;
 }
 
-function init(inconf, inverb)
-{
-	const wires = {};
-	const queue = [];
-	const effect = mkeffect(0, 0, inverb);
-	const clen = inconf.length;
-
-	effect.call(inenv);
-
-	for (let i = 0; i < clen; i++) {
-		const eqn = inconf[i];
-		const left = eqn.left;
-		const right = eqn.right;
-
-		queue.push({
-			left: encode(0, 0, left, wires, true),
-			right: encode(0, 0, right, wires, true)
-		});
-	}
-
-	flush(queue);
-}
-
 function prepare(src, fmt, deadlock)
 {
-	const system = parser.parse(src);
-
 	if (fmt)
 		format = fmt;
 	else
@@ -651,9 +646,7 @@ function prepare(src, fmt, deadlock)
 	lpaxtype = -1;
 	rpaxtype = -2;
 
-	table = gettable(system.conf, system.rules);
-
-	init(system.conf, system.code);
+	setup(src);
 
 	return inenv;
 }
