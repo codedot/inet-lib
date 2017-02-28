@@ -4,7 +4,7 @@ const compile = require("./compile");
 
 const parser = new compile.Parser();
 
-let inverb, inrules, inconf, inenv, inqueue, nwires, nambs;
+let inenv, inqueue, nwires, nambs;
 let typelist, types, ntypes, wiretype, ambtype, table;
 let lpaxtype, rpaxtype, format, ndebug;
 
@@ -422,7 +422,7 @@ function addrule(dict, rule)
 		dict[human] = [rule];
 }
 
-function gettable()
+function gettable(inconf, inrules)
 {
 	const tab = [];
 	const custom = {};
@@ -592,7 +592,7 @@ function encode(lval, rval, tree, wires, rt)
 	return tree;
 }
 
-function init()
+function init(inconf, inverb)
 {
 	const wires = {};
 	const queue = [];
@@ -625,9 +625,6 @@ function prepare(src, fmt, deadlock)
 		format = noformat;
 
 	ndebug = !deadlock;
-	inverb = system.code;
-	inrules = system.rules;
-	inconf = system.conf;
 	inenv = run.inenv;
 	inqueue = [];
 	typelist = [];
@@ -654,9 +651,9 @@ function prepare(src, fmt, deadlock)
 	lpaxtype = -1;
 	rpaxtype = -2;
 
-	table = gettable();
+	table = gettable(system.conf, system.rules);
 
-	init();
+	init(system.conf, system.code);
 
 	return inenv;
 }
