@@ -5,8 +5,13 @@ const compile = require("./compile");
 const parser = new compile.Parser();
 
 let inenv, inqueue, nwires, nambs;
-let typelist, types, ntypes, wiretype, ambtype, table;
-let lpaxtype, rpaxtype, format, ndebug;
+let typelist, types, ntypes, table;
+let format, ndebug;
+
+const ambtype = 1;
+const wiretype = 0;
+const lpaxtype = -1;
+const rpaxtype = -2;
 
 function addtypes(tree)
 {
@@ -624,8 +629,8 @@ function prepare(src, fmt, deadlock)
 	inqueue = [];
 	typelist = [];
 	types = {
-		wire: 0,
-		amb: 1
+		wire: wiretype,
+		amb: ambtype
 	};
 	ntypes = 2;
 	nwires = 0;
@@ -640,11 +645,6 @@ function prepare(src, fmt, deadlock)
 	indbma.pseudo = true;
 	indagent.pseudo = true;
 	indtnega.pseudo = true;
-
-	wiretype = types["wire"];
-	ambtype = types["amb"];
-	lpaxtype = -1;
-	rpaxtype = -2;
 
 	setup(src);
 
