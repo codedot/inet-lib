@@ -485,7 +485,7 @@ function gettable()
 	return tab;
 }
 
-function traverse(pair)
+function reduce(pair)
 {
 	const left = pair.left;
 	const right = pair.right;
@@ -504,21 +504,6 @@ function traverse(pair)
 	}
 
 	norules(left, right);
-}
-
-function reduce(max)
-{
-	if (!max)
-		max = 1e7;
-
-	for (let i = 0; i < max; i++) {
-		const pair = inqueue.shift();
-
-		if (!pair)
-			break;
-
-		traverse(pair);
-	}
 }
 
 function flush(queue)
@@ -761,7 +746,7 @@ function debug()
 	const pair = inqueue.shift();
 
 	if (pair)
-		traverse(pair);
+		reduce(pair);
 
 	return conf;
 }
@@ -771,7 +756,7 @@ function debug0()
 	const pair = inqueue.shift();
 
 	if (pair) {
-		traverse(pair);
+		reduce(pair);
 		return true;
 	}
 
@@ -785,7 +770,7 @@ function debug1()
 	if (pair) {
 		const eqn = geteqn(pair);
 
-		traverse(pair);
+		reduce(pair);
 		return eqn;
 	}
 }
@@ -835,8 +820,20 @@ function run(src, max)
 
 	prepare(src);
 
+	if (!max)
+		max = 1e7;
+
 	t0 = Date.now();
-	reduce(max);
+
+	for (let i = 0; i < max; i++) {
+		const pair = inqueue.shift();
+
+		if (!pair)
+			break;
+
+		reduce(pair);
+	}
+
 	t1 = Date.now();
 
 	inenv.redtime = t1 - t0;
