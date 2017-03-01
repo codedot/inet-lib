@@ -1,15 +1,19 @@
 "use strict";
 
 const compile = require("./compile");
+const format = require("./format");
 
 const parser = new compile.Parser();
+const reset = format.reset;
+const geteqn = format.geteqn;
+const getconf = format.getconf;
 
 const ambtype = 1;
 const wiretype = 0;
 const lpaxtype = -1;
 const rpaxtype = -2;
 
-let inenv, inqueue, nwires, nambs, typelist, types, table, infmt;
+let inenv, inqueue, ntypes, types, table;
 
 function addtypes(tree)
 {
@@ -21,8 +25,8 @@ function addtypes(tree)
 		return;
 
 	if (!types[agent]) {
-		types[agent] = typelist.length;
-		typelist.push(agent);
+		types[agent] = ntypes;
+		++ntypes;
 	}
 
 	for (let i = 0; i < plen; i++)
@@ -571,121 +575,24 @@ function encode(lval, rval, tree, wires, rt)
 
 function prepare(src, fmt)
 {
-	if (fmt)
-		infmt = fmt;
-	else
-		infmt = nofmt;
-
 	inenv = run.inenv;
 	inqueue = [];
-	typelist = [
-		"wire",
-		"amb"
-	];
+	ntypes = 2;
 	types = {
 		wire: wiretype,
 		amb: ambtype
 	};
-	nwires = 0;
-	nambs = 0;
-
-	norules.pseudo = true;
-	determ.pseudo = true;
-	mreted.pseudo = true;
-	indwire.pseudo = true;
-	inderiw.pseudo = true;
-	indamb.pseudo = true;
-	indbma.pseudo = true;
-	indagent.pseudo = true;
-	indtnega.pseudo = true;
 
 	setup(src);
+
+	reset(fmt, types);
 
 	return inenv;
 }
 
-function getlist(pax)
-{
-	const list = pax.map(gettree);
-
-	if (list.length)
-		return "(" + list.join(", ") + ")";
-	else
-		return "";
-}
-
-function nofmt(data)
-{
-	return data;
-}
-
-function gettree(agent)
-{
-	const type = agent.type;
-	let human;
-
-	if (wiretype == type) {
-		human = agent.human;
-
-		if (!human) {
-			++nwires;
-			human = "w" + nwires;
-			agent.human = human;
-		}
-
-		agent.twin.human = human;
-	} else if (ambtype == type) {
-		const need = agent.need ? "!" : "\\";
-		let index = agent.index;
-		let list = "";
-
-		if (!index || (nambs < index)) {
-			++nambs;
-			index = nambs;
-			agent.twin.index = nambs;
-
-			list = getlist([
-				agent.main,
-				agent.aux
-			]);
-		}
-
-		human = need + "amb#" + index + list;
-	} else {
-		const need = agent.need ? "!" : "\\";
-		let data = infmt(agent.data);
-		let cell;
-
-		if (void(0) == data)
-			data = "";
-		else
-			data = "_{" + data + "}";
-
-		cell = typelist[type] + data;
-
-		human = need + cell + getlist(agent.pax);
-	}
-
-	return human;
-}
-
-function geteqn(pair)
-{
-	const left = gettree(pair.left);
-	const right = gettree(pair.right);
-
-	return left + " = " + right + ";";
-}
-
-function getconf()
-{
-	nambs = 0;
-	return inqueue.map(geteqn).join("\n");
-}
-
 function debug()
 {
-	const conf = getconf();
+	const conf = getconf(inqueue);
 	const pair = inqueue.shift();
 
 	if (pair)
@@ -783,6 +690,16 @@ function run(src, max)
 	inenv.stats = getstats();
 	return inenv;
 }
+
+norules.pseudo = true;
+determ.pseudo = true;
+mreted.pseudo = true;
+indwire.pseudo = true;
+inderiw.pseudo = true;
+indamb.pseudo = true;
+indbma.pseudo = true;
+indagent.pseudo = true;
+indtnega.pseudo = true;
 
 run.inenv = {};
 run.prepare = prepare;
