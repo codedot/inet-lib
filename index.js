@@ -385,7 +385,7 @@ function addrule(dict, rule)
 		dict[human] = [rule];
 }
 
-function setup(src)
+function setup(src, env)
 {
 	const system = parser.parse(src);
 	const inrules = system.rules;
@@ -398,6 +398,12 @@ function setup(src)
 	const effect = mkeffect(0, 0, system.code);
 
 	table = [];
+	inenv = env;
+	ntypes = 2;
+	types = {
+		wire: wiretype,
+		amb: ambtype
+	};
 
 	for (let i = 0; i < rlen; i++) {
 		const rule = inrules[i];
@@ -463,7 +469,11 @@ function setup(src)
 		});
 	}
 
-	flush(queue);
+	return {
+		queue: queue,
+		rules: table,
+		types: types
+	};
 }
 
 function reduce(pair)
@@ -575,17 +585,15 @@ function encode(lval, rval, tree, wires, rt)
 
 function prepare(src, fmt)
 {
+	let system;
+
 	inenv = run.inenv;
 	inqueue = [];
-	ntypes = 2;
-	types = {
-		wire: wiretype,
-		amb: ambtype
-	};
 
-	setup(src);
-
-	reset(fmt, types);
+	system = setup(src, inenv);
+	table = system.rules;
+	flush(system.queue);
+	reset(fmt, system.types);
 
 	return inenv;
 }
