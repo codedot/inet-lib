@@ -136,15 +136,15 @@ function determ(amb, agent)
 		dst.data = aux.data;
 	}
 
-	flush([{
+	return [{
 		left: amb.main,
 		right: agent
-	}]);
+	}];
 }
 
 function mreted(agent, amb)
 {
-	determ(amb, agent);
+	return determ(amb, agent);
 }
 
 function mkeffect(lval, rval, code, expr)
@@ -508,12 +508,17 @@ function flush(queue)
 		const row = table[left.type];
 		const rules = row[right.type];
 
-		pair.rules = rules;
+		if (rules.pseudo) {
+			const amb = rules(left, right);
 
-		if (rules.pseudo)
-			rules(left, right);
-		else
-			inqueue.push(pair);
+			if (amb)
+				flush(amb);
+
+			continue;
+		}
+
+		pair.rules = rules;
+		inqueue.push(pair);
 	}
 }
 
