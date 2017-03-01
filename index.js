@@ -27,7 +27,7 @@ function reduce(pair)
 		}
 	}
 
-	norules(left, right);
+	throw "NO RULES: " + geteqn(pair);
 }
 
 function flush(queue)

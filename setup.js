@@ -29,16 +29,6 @@ function addtypes(tree)
 		addtypes(pax[i]);
 }
 
-function norules(lagent, ragent)
-{
-	const eqn = geteqn({
-		left: lagent,
-		right: ragent
-	});
-
-	throw "NO RULES: " + eqn;
-}
-
 function indwire(wire, agent)
 {
 	const dst = wire.twin;
@@ -509,7 +499,7 @@ function setup(src, env)
 				else if ("amb" == right)
 					rules = mreted;
 				else
-					rules = norules;
+					rules = [];
 			}
 
 			row[types[right]] = rules;
@@ -538,7 +528,6 @@ function setup(src, env)
 	};
 }
 
-norules.pseudo = true;
 determ.pseudo = true;
 mreted.pseudo = true;
 indwire.pseudo = true;
