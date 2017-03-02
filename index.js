@@ -42,7 +42,7 @@ function prepare(src, fmt)
 function debug()
 {
 	const conf = getconf(inqueue);
-	const pair = inqueue.shift();
+	const pair = inqueue.pop();
 
 	if (pair)
 		reduce(pair);
@@ -52,7 +52,7 @@ function debug()
 
 function debug0()
 {
-	const pair = inqueue.shift();
+	const pair = inqueue.pop();
 
 	if (pair) {
 		reduce(pair);
@@ -64,7 +64,7 @@ function debug0()
 
 function debug1()
 {
-	const pair = inqueue.shift();
+	const pair = inqueue.pop();
 
 	if (pair) {
 		const eqn = geteqn(pair);
@@ -120,12 +120,10 @@ function run(src, max)
 	t0 = Date.now();
 
 	for (let i = 0; i < max; i++) {
-		const pair = inqueue.shift();
-
-		if (!pair)
+		if (!inqueue.length)
 			break;
 
-		reduce(pair);
+		reduce(inqueue.pop());
 	}
 
 	t1 = Date.now();
