@@ -15,12 +15,9 @@ function reduce(pair)
 	const right = pair.right;
 	const row = table[left.type];
 	const rule = row[right.type];
-	const queue = rule(left, right);
 
-	if (!queue)
+	if (!rule(left, right))
 		throw "NO RULES: " + geteqn(pair);
-
-	inqueue.push.apply(inqueue, queue);
 
 	++rule.count;
 }

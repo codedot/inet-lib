@@ -9,7 +9,7 @@ const wiretype = 0;
 const lpaxtype = -1;
 const rpaxtype = -2;
 
-let inenv, ntypes, types;
+let inqueue, inenv, ntypes, types;
 
 function addtypes(tree)
 {
@@ -37,7 +37,7 @@ function indwire(wire, agent)
 	dst.twin = twin;
 	twin.twin = dst;
 
-	return [];
+	return true;
 }
 
 function inderiw(agent, wire)
@@ -57,7 +57,7 @@ function indamb(wire, agent)
 	dst.main = agent.main;
 	dst.aux = agent.aux;
 
-	return [];
+	return true;
 }
 
 function indbma(agent, wire)
@@ -73,7 +73,7 @@ function indagent(wire, agent)
 	dst.pax = agent.pax;
 	dst.data = agent.data;
 
-	return [];
+	return true;
 }
 
 function indtnega(agent, wire)
@@ -128,10 +128,12 @@ function determ(amb, agent)
 		dst.data = aux.data;
 	}
 
-	return [{
+	inqueue.push({
 		left: amb.main,
 		right: agent
-	}];
+	});
+
+	return true;
 }
 
 function mreted(agent, amb)
@@ -294,7 +296,7 @@ function genqueue(img)
 	}");
 	}
 
-	return "[" + queue.join(", ") + "]";
+	return queue.join(", ");
 }
 
 function generate(img, wlist, alist, effect, rl)
@@ -309,9 +311,10 @@ function generate(img, wlist, alist, effect, rl)
 	const lpax = left.pax;\n\
 	const rpax = right.pax;\n\n\
 	" + gentwins(wlist, alist) + "\
-	return " + genqueue(img) + ";";
+	queue.push(" + genqueue(img) + ");\n\
+	return true;";
 
-	return new Function("left", "right", body);
+	return new Function("queue", "left", "right", body);
 }
 
 function apply(left, right, code, rl)
@@ -361,7 +364,7 @@ function apply(left, right, code, rl)
 	}
 
 	interact = generate(oimg, wlist, alist, effect, rl);
-	interact = interact.bind(inenv);
+	interact = interact.bind(inenv, inqueue);
 	interact.human = human;
 	return interact;
 }
@@ -451,11 +454,12 @@ function traverse(list, pair)
 	{
 		for (let i = 0; i < n; i++) {
 			const rule = list[i];
-			const queue = rule(left, right);
 
-			if (queue)
-				return queue;
+			if (rule(left, right))
+				return true;
 		}
+
+		return false;
 	}
 
 	compound.human = pair;
@@ -472,10 +476,10 @@ function setup(src, env)
 	const clen = inconf.length;
 	const custom = {};
 	const wires = {};
-	const queue = [];
 	const table = [];
 	const effect = mkeffect(0, 0, system.code);
 
+	inqueue = [];
 	inenv = env;
 	ntypes = 2;
 	types = {
@@ -544,14 +548,14 @@ function setup(src, env)
 		const left = eqn.left;
 		const right = eqn.right;
 
-		queue.push({
+		inqueue.push({
 			left: encode(0, 0, left, wires, true),
 			right: encode(0, 0, right, wires, true)
 		});
 	}
 
 	return {
-		queue: queue,
+		queue: inqueue,
 		rules: table,
 		types: types
 	};
