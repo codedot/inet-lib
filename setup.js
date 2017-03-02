@@ -36,11 +36,13 @@ function indwire(wire, agent)
 
 	dst.twin = twin;
 	twin.twin = dst;
+
+	return [];
 }
 
 function inderiw(agent, wire)
 {
-	indwire(wire, agent);
+	return indwire(wire, agent);
 }
 
 function indamb(wire, agent)
@@ -54,11 +56,13 @@ function indamb(wire, agent)
 	dst.type = ambtype;
 	dst.main = agent.main;
 	dst.aux = agent.aux;
+
+	return [];
 }
 
 function indbma(agent, wire)
 {
-	indamb(wire, agent);
+	return indamb(wire, agent);
 }
 
 function indagent(wire, agent)
@@ -68,11 +72,13 @@ function indagent(wire, agent)
 	dst.type = agent.type;
 	dst.pax = agent.pax;
 	dst.data = agent.data;
+
+	return [];
 }
 
 function indtnega(agent, wire)
 {
-	indagent(wire, agent);
+	return indagent(wire, agent);
 }
 
 function getindir(type)
@@ -355,8 +361,8 @@ function apply(left, right, code, rl)
 	}
 
 	interact = generate(oimg, wlist, alist, effect, rl);
+	interact = interact.bind(inenv);
 	interact.human = human;
-	interact.count = 0;
 	return interact;
 }
 
@@ -437,6 +443,26 @@ function encode(lval, rval, tree, wires, rt)
 	return tree;
 }
 
+function traverse(list, pair)
+{
+	const n = list.length;
+
+	function compound(left, right)
+	{
+		for (let i = 0; i < n; i++) {
+			const rule = list[i];
+			const queue = rule(left, right);
+
+			if (queue)
+				return queue;
+		}
+	}
+
+	compound.human = pair;
+	compound.count = 0;
+	return compound;
+}
+
 function setup(src, env)
 {
 	const system = parser.parse(src);
@@ -474,6 +500,9 @@ function setup(src, env)
 		addrule(custom, rlfunc);
 	}
 
+	for (const pair in custom)
+		custom[pair] = traverse(custom[pair], pair);
+
 	for (let i = 0; i < clen; i++) {
 		const eqn = inconf[i];
 		const left = eqn.left;
@@ -487,22 +516,22 @@ function setup(src, env)
 		const row = [];
 
 		for (const right in types) {
-			let rules = custom[left + "><" + right];
+			let rule = custom[left + "><" + right];
 
-			if (!rules) {
+			if (!rule) {
 				if ("wire" == left)
-					rules = getindir(right);
+					rule = getindir(right);
 				else if ("wire" == right)
-					rules = getridni(left);
+					rule = getridni(left);
 				else if ("amb" == left)
-					rules = determ;
+					rule = determ;
 				else if ("amb" == right)
-					rules = mreted;
+					rule = mreted;
 				else
-					rules = [];
+					rule = () => {};
 			}
 
-			row[types[right]] = rules;
+			row[types[right]] = rule;
 		}
 
 		table[types[left]] = row;
@@ -527,14 +556,5 @@ function setup(src, env)
 		types: types
 	};
 }
-
-determ.pseudo = true;
-mreted.pseudo = true;
-indwire.pseudo = true;
-inderiw.pseudo = true;
-indamb.pseudo = true;
-indbma.pseudo = true;
-indagent.pseudo = true;
-indtnega.pseudo = true;
 
 module.exports = setup;

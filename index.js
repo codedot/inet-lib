@@ -13,46 +13,16 @@ function reduce(pair)
 {
 	const left = pair.left;
 	const right = pair.right;
-	const rules = pair.rules;
-	const rlen = rules.length;
+	const row = table[left.type];
+	const rule = row[right.type];
+	const queue = rule(left, right);
 
-	for (let i = 0; i < rlen; i++) {
-		const rule = rules[i];
-		const queue = rule.call(inenv, left, right);
+	if (!queue)
+		throw "NO RULES: " + geteqn(pair);
 
-		if (queue) {
-			++rule.count;
-			flush(queue);
-			return;
-		}
-	}
+	inqueue.push.apply(inqueue, queue);
 
-	throw "NO RULES: " + geteqn(pair);
-}
-
-function flush(queue)
-{
-	const qlen = queue.length;
-
-	for (let i = 0; i < qlen; i++) {
-		const pair = queue[i];
-		const left = pair.left;
-		const right = pair.right;
-		const row = table[left.type];
-		const rules = row[right.type];
-
-		if (rules.pseudo) {
-			const amb = rules(left, right);
-
-			if (amb)
-				flush(amb);
-
-			continue;
-		}
-
-		pair.rules = rules;
-		inqueue.push(pair);
-	}
+	++rule.count;
 }
 
 function prepare(src, fmt)
@@ -60,11 +30,10 @@ function prepare(src, fmt)
 	let system;
 
 	inenv = run.inenv;
-	inqueue = [];
 
 	system = setup(src, inenv);
 	table = system.rules;
-	flush(system.queue);
+	inqueue = system.queue;
 	reset(fmt, system.types);
 
 	return inenv;
@@ -115,29 +84,24 @@ function getstats()
 		const rlen = row.length;
 
 		for (let j = 0; j < rlen; j++) {
-			const cell = row[j];
-			const clen = cell.length;
+			const rule = row[j];
+			const count = rule.count;
+			let human = rule.human;
 
-			if (cell.pseudo)
+			if (!human)
 				continue;
 
-			for (let k = 0; k < clen; k++) {
-				const rule = cell[k];
-				const count = rule.count;
-				let human = rule.human;
+			if (!count)
+				continue;
 
-				if (!count)
-					continue;
+			human = human.split("><");
+			human = human.sort();
+			human = human.join("><");
 
-				human = human.split("><");
-				human = human.sort();
-				human = human.join("><");
-
-				if (stats[human])
-					stats[human] += count;
-				else
-					stats[human] = count;
-			}
+			if (stats[human])
+				stats[human] += count;
+			else
+				stats[human] = count;
 		}
 	}
 
