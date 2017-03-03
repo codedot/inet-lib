@@ -50,13 +50,18 @@ function indamb(wire, agent)
 {
 	const dst = wire.twin;
 	const twin = agent.twin;
+	const main = agent.main;
+	const aux = agent.aux;
 
 	dst.twin = twin;
 	twin.twin = dst;
 
 	dst.type = ambtype;
-	dst.main = agent.main;
-	dst.aux = agent.aux;
+	dst.main = main;
+	dst.aux = aux;
+
+	adopt(dst, main);
+	adopt(dst, aux);
 
 	return true;
 }
@@ -69,10 +74,15 @@ function indbma(agent, wire)
 function indagent(wire, agent)
 {
 	const dst = wire.twin;
+	const pax = agent.pax;
+	const plen = pax.length;
 
 	dst.type = agent.type;
-	dst.pax = agent.pax;
 	dst.data = agent.data;
+	dst.pax = pax;
+
+	for (let i = 0; i < plen; i++)
+		adopt(dst, pax[i]);
 
 	return true;
 }
