@@ -104,30 +104,8 @@ function getridni(type)
 
 function determ(amb, agent)
 {
-	const dst = amb.twin;
-	const aux = amb.aux;
-	const type = aux.type;
-
-	if (wiretype == type) {
-		const twin = aux.twin;
-
-		dst.twin = twin;
-		twin.twin = dst;
-
-		dst.type = type;
-	} else if (ambtype == type) {
-		const twin = aux.twin;
-
-		dst.twin = twin;
-		twin.twin = dst;
-
-		dst.main = aux.main;
-		dst.aux = aux.aux;
-	} else {
-		dst.type = type;
-		dst.pax = aux.pax;
-		dst.data = aux.data;
-	}
+	amb.type = wiretype;
+	flush(amb, amb.aux);
 
 	flush(amb.main, agent);
 
