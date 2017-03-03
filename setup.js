@@ -486,6 +486,7 @@ function setup(src, env)
 	const clen = inconf.length;
 	const custom = {};
 	const wires = {};
+	const queue = [];
 	const effect = mkeffect(0, 0, system.code);
 
 	table = [];
@@ -558,11 +559,18 @@ function setup(src, env)
 		const left = eqn.left;
 		const right = eqn.right;
 
-		inqueue.push({
+		queue.push({
 			left: encode(0, 0, left, wires, true),
 			right: encode(0, 0, right, wires, true)
 		});
 	}
+
+	queue.forEach(pair => {
+		const left = pair.left;
+		const right = pair.right;
+
+		flush(left, right);
+	});
 
 	return {
 		queue: inqueue,
