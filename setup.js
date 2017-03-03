@@ -397,7 +397,7 @@ function adopt(parent, agent)
 		}
 	}
 
-	agent.parent = true;
+	agent.parent = parent;
 }
 
 function flush(left, right)
