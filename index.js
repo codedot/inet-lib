@@ -105,16 +105,9 @@ function getstats()
 	return stats;
 }
 
-function run(src, max)
+function perform(max)
 {
-	let t0, t1;
-
-	prepare(src);
-
-	if (!max)
-		max = 1e7;
-
-	t0 = Date.now();
+	const t0 = Date.now();
 
 	for (let i = 0; i < max; i++) {
 		if (!inqueue.length)
@@ -123,9 +116,13 @@ function run(src, max)
 		reduce(inqueue.pop());
 	}
 
-	t1 = Date.now();
+	return Date.now() - t0;
+}
 
-	inenv.redtime = t1 - t0;
+function run(src, max)
+{
+	prepare(src);
+	inenv.redtime = perform(max ? max : 1e7);
 	inenv.stats = getstats();
 	return inenv;
 }
