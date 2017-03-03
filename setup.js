@@ -287,16 +287,13 @@ function genqueue(img)
 
 	for (let i = 0; i < ilen; i++) {
 		const pair = img[i];
-		const left = pair.left;
-		const right = pair.right;
+		const left = genclone(pair.left);
+		const right = genclone(pair.right);
 
-		queue.push("{\n\
-		left: " + genclone(left) + ",\n\
-		right: " + genclone(right) + "\n\
-	}");
+		queue.push("queue(" + left + "," + right + ");");
 	}
 
-	return queue.join(", ");
+	return queue.join("\n");
 }
 
 function generate(img, wlist, alist, effect, rl)
@@ -311,7 +308,7 @@ function generate(img, wlist, alist, effect, rl)
 	const lpax = left.pax;\n\
 	const rpax = right.pax;\n\n\
 	" + gentwins(wlist, alist) + "\
-	queue.push(" + genqueue(img) + ");\n\
+	" + genqueue(img) + "\n\
 	return true;";
 
 	return new Function("queue", "left", "right", body);
@@ -364,9 +361,35 @@ function apply(left, right, code, rl)
 	}
 
 	interact = generate(oimg, wlist, alist, effect, rl);
-	interact = interact.bind(inenv, inqueue);
+	interact = interact.bind(inenv, indirect);
 	interact.human = human;
 	return interact;
+}
+
+function indirect(wire, agent)
+{
+	if (wiretype == wire.type) {
+		const dst = wire.twin;
+		const twin = agent.twin;
+
+		if (twin) {
+			dst.twin = twin;
+			twin.twin = dst;
+		}
+
+		dst.type = agent.type;
+		dst.main = agent.main;
+		dst.aux = agent.aux;
+		dst.pax = agent.pax;
+		dst.data = agent.data;
+
+		return;
+	}
+
+	inqueue.push({
+		left: wire,
+		right: agent
+	});
 }
 
 function addrule(dict, rule)
