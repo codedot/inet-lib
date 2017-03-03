@@ -354,6 +354,22 @@ function apply(left, right, code, rl)
 
 function adopt(parent, agent)
 {
+	if (!agent.parent) {
+		const type = agent.type;
+
+		if (ambtype == type) {
+			adopt(agent, agent.main);
+			adopt(agent, agent.aux);
+		} else if (wiretype != type) {
+			const pax = agent.pax;
+			const plen = pax.length;
+
+			for (let i = 0; i < plen; i++)
+				adopt(agent, pax[i]);
+		}
+	}
+
+	agent.parent = true;
 }
 
 function flush(left, right)
