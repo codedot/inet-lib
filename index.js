@@ -13,8 +13,7 @@ function reduce(pair)
 {
 	const left = pair.left;
 	const right = pair.right;
-	const row = table[left.type];
-	const rule = row[right.type];
+	const rule = pair.rule;
 
 	if (!rule(left, right))
 		throw "NO RULES: " + geteqn(pair);

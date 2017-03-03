@@ -368,14 +368,15 @@ function flush(left, right)
 	const row = table[left.type];
 	const rule = row[right.type];
 
-	if (rule.indir) {
+	if (rule.pseudo) {
 		rule(left, right);
 		return;
 	}
 
 	inqueue.push({
 		left: left,
-		right: right
+		right: right,
+		rule: rule
 	});
 }
 
@@ -579,11 +580,13 @@ function setup(src, env)
 	};
 }
 
-indwire.indir = true;
-inderiw.indir = true;
-indamb.indir = true;
-indbma.indir = true;
-indagent.indir = true;
-indtnega.indir = true;
+determ.pseudo = true;
+mreted.pseudo = true;
+indwire.pseudo = true;
+inderiw.pseudo = true;
+indamb.pseudo = true;
+indbma.pseudo = true;
+indagent.pseudo = true;
+indtnega.pseudo = true;
 
 module.exports = setup;
