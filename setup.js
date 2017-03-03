@@ -8,6 +8,7 @@ const ambtype = 1;
 const wiretype = 0;
 const lpaxtype = -1;
 const rpaxtype = -2;
+const eqntype = -3;
 
 let inqueue, inenv, ntypes, types, table;
 
@@ -363,6 +364,10 @@ function apply(left, right, code, rl)
 	return interact;
 }
 
+function adopt(parent, agent)
+{
+}
+
 function flush(left, right)
 {
 	const row = table[left.type];
@@ -371,13 +376,19 @@ function flush(left, right)
 	if (rule.pseudo) {
 		rule(left, right);
 		return;
-	}
+	} else {
+		const pair = {
+			type: eqntype,
+			left: left,
+			right: right,
+			rule: rule
+		};
 
-	inqueue.push({
-		left: left,
-		right: right,
-		rule: rule
-	});
+		adopt(pair, left);
+		adopt(pair, right);
+
+		inqueue.push(pair);
+	}
 }
 
 function addrule(dict, rule)
