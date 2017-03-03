@@ -19,6 +19,9 @@ function reduce(pair)
 		throw "NO RULES: " + geteqn(pair);
 
 	++rule.count;
+
+	pair.left = void(0);
+	pair.right = void(0);
 }
 
 function prepare(src, fmt)

@@ -38,6 +38,10 @@ function indwire(wire, agent)
 	dst.twin = twin;
 	twin.twin = dst;
 
+	wire.parent = void(0);
+	wire.twin = void(0);
+	agent.parent = void(0);
+	agent.twin = void(0);
 	return true;
 }
 
@@ -63,6 +67,12 @@ function indamb(wire, agent)
 	adopt(dst, main);
 	adopt(dst, aux);
 
+	wire.parent = void(0);
+	wire.twin = void(0);
+	agent.parent = void(0);
+	agent.twin = void(0);
+	agent.main = void(0);
+	agent.aux = void(0);
 	return true;
 }
 
@@ -84,6 +94,11 @@ function indagent(wire, agent)
 	for (let i = 0; i < plen; i++)
 		adopt(dst, pax[i]);
 
+	wire.parent = void(0);
+	wire.twin = void(0);
+	agent.parent = void(0);
+	agent.data = void(0);
+	agent.pax = void(0);
 	return true;
 }
 
@@ -114,11 +129,18 @@ function getridni(type)
 
 function determ(amb, agent)
 {
+	const twin = amb.twin;
+	const main = amb.main;
+	const aux = amb.aux;
+
 	amb.type = wiretype;
-	flush(amb, amb.aux);
+	amb.main = void(0);
+	amb.aux = void(0);
+	twin.main = void(0);
+	twin.aux = void(0);
 
-	flush(amb.main, agent);
-
+	flush(amb, aux);
+	flush(main, agent);
 	return true;
 }
 
@@ -293,6 +315,12 @@ function generate(img, wlist, alist, effect, rl)
 		return;\n\n\
 	const lpax = left.pax;\n\
 	const rpax = right.pax;\n\n\
+	left.parent = void(0);\n\
+	left.data = void(0);\n\
+	left.pax = void(0);\n\
+	right.parent = void(0);\n\
+	right.data = void(0);\n\
+	right.pax = void(0);\n\
 	" + gentwins(wlist, alist) + "\
 	" + genqueue(img) + "\n\
 	return true;";
