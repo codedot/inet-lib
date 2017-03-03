@@ -9,7 +9,7 @@ const wiretype = 0;
 const lpaxtype = -1;
 const rpaxtype = -2;
 
-let inqueue, inenv, ntypes, types;
+let inqueue, inenv, ntypes, types, table;
 
 function addtypes(tree)
 {
@@ -128,10 +128,7 @@ function determ(amb, agent)
 		dst.data = aux.data;
 	}
 
-	inqueue.push({
-		left: amb.main,
-		right: agent
-	});
+	flush(amb.main, agent);
 
 	return true;
 }
@@ -290,7 +287,7 @@ function genqueue(img)
 		const left = genclone(pair.left);
 		const right = genclone(pair.right);
 
-		queue.push("queue(" + left + "," + right + ");");
+		queue.push("flush(" + left + "," + right + ");");
 	}
 
 	return queue.join("\n");
@@ -311,7 +308,7 @@ function generate(img, wlist, alist, effect, rl)
 	" + genqueue(img) + "\n\
 	return true;";
 
-	return new Function("queue", "left", "right", body);
+	return new Function("flush", "left", "right", body);
 }
 
 function apply(left, right, code, rl)
@@ -361,34 +358,24 @@ function apply(left, right, code, rl)
 	}
 
 	interact = generate(oimg, wlist, alist, effect, rl);
-	interact = interact.bind(inenv, indirect);
+	interact = interact.bind(inenv, flush);
 	interact.human = human;
 	return interact;
 }
 
-function indirect(wire, agent)
+function flush(left, right)
 {
-	if (wiretype == wire.type) {
-		const dst = wire.twin;
-		const twin = agent.twin;
+	const row = table[left.type];
+	const rule = row[right.type];
 
-		if (twin) {
-			dst.twin = twin;
-			twin.twin = dst;
-		}
-
-		dst.type = agent.type;
-		dst.main = agent.main;
-		dst.aux = agent.aux;
-		dst.pax = agent.pax;
-		dst.data = agent.data;
-
+	if (rule.indir) {
+		rule(left, right);
 		return;
 	}
 
 	inqueue.push({
-		left: wire,
-		right: agent
+		left: left,
+		right: right
 	});
 }
 
@@ -499,9 +486,9 @@ function setup(src, env)
 	const clen = inconf.length;
 	const custom = {};
 	const wires = {};
-	const table = [];
 	const effect = mkeffect(0, 0, system.code);
 
+	table = [];
 	inqueue = [];
 	inenv = env;
 	ntypes = 2;
@@ -583,5 +570,12 @@ function setup(src, env)
 		types: types
 	};
 }
+
+indwire.indir = true;
+inderiw.indir = true;
+indamb.indir = true;
+indbma.indir = true;
+indagent.indir = true;
+indtnega.indir = true;
 
 module.exports = setup;
