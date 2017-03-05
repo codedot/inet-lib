@@ -25,7 +25,7 @@ function gentwins(body, wlist, alist)
 	}
 
 	for (let i = 0; i < alen; i++) {
-		const tree = genclone(alist[i]);
+		const tree = genclone(body, alist[i]);
 
 		body.push(`const tree${i} = ${tree};`);
 	}
@@ -44,7 +44,7 @@ function gentwins(body, wlist, alist)
 	}
 }
 
-function genclone(img)
+function genclone(body, img)
 {
 	const type = img.type;
 	const imgpax = img.pax;
@@ -65,7 +65,7 @@ function genclone(img)
 
 	iplen = imgpax.length;
 	for (let i = 0; i < iplen; i++)
-		pax[i] = genclone(imgpax[i]);
+		pax[i] = genclone(body, imgpax[i]);
 
 	return `{
 		type: ${type},
@@ -80,8 +80,8 @@ function genqueue(body, img)
 
 	for (let i = 0; i < ilen; i++) {
 		const pair = img[i];
-		const left = genclone(pair.left);
-		const right = genclone(pair.right);
+		const left = genclone(body, pair.left);
+		const right = genclone(body, pair.right);
 
 		body.push(`flush(${left}, ${right});`);
 	}
