@@ -7,8 +7,7 @@ const rpaxtype = -2;
 
 function geneff(effect)
 {
-	effect = "(" + effect.toString() + ")";
-	return effect + ".call(this, lval, rval)";
+	return `(${effect.toString()}).call(this, lval, rval)`;
 }
 
 function gentwins(body, wlist, alist)
@@ -53,26 +52,26 @@ function genclone(img)
 	let iplen;
 
 	if (lpaxtype == type)
-		return "lpax[" + img.id + "]";
+		return `lpax[${img.id}]`;
 
 	if (rpaxtype == type)
-		return "rpax[" + img.id + "]";
+		return `rpax[${img.id}]`;
 
 	if (wiretype == type)
-		return "wire" + img.id;
+		return `wire${img.id}`;
 
 	if (ambtype == type)
-		return "wire" + img.id;
+		return `wire${img.id}`;
 
 	iplen = imgpax.length;
 	for (let i = 0; i < iplen; i++)
 		pax[i] = genclone(imgpax[i]);
 
-	return "{\n\
-			type: " + type + ",\n\
-			pax: [" + pax.join(", ") + "],\n\
-			data: " + geneff(img.effect) + "\n\
-		}";
+	return `{
+		type: ${type},
+		pax: [${pax.join(", ")}],
+		data: ${geneff(img.effect)}
+	}`;
 }
 
 function genqueue(body, img)
