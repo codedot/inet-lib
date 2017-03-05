@@ -213,49 +213,38 @@ function geneff(effect)
 	return effect + ".call(this, lval, rval)";
 }
 
-function gentwins(wlist, alist)
+function gentwins(body, wlist, alist)
 {
 	const wlen = wlist.length;
 	const alen = alist.length;
-	let head = "";
-	let tail = "";
 
 	if (!wlist.length)
-		return "";
+		return;
 
 	for (let i = 0; i < wlen; i++) {
-		const wire = wlist[i];
-		const type = wire.type;
-		const twin = wire.twin.id;
+		const type = wlist[i].type;
 
-		head = head.concat("\
-	const wire" + i + " = {type: " + type + "};\n");
-
-		tail = tail.concat("\
-	wire" + i + ".twin = wire" + twin + ";\n");
+		body.push(`const wire${i} = {type: ${type}};`);
 	}
 
 	for (let i = 0; i < alen; i++) {
-		const tree = alist[i];
+		const tree = genclone(alist[i]);
 
-		head = head.concat("\
-	const tree" + i + " = " + genclone(tree) + ";\n");
+		body.push(`const tree${i} = ${tree};`);
 	}
 
 	for (let i = 0; i < wlen; i++) {
 		const wire = wlist[i];
+		const twin = wire.twin.id;
 
-		if (ambtype == wire.type) {
-			const main = wire.main;
-			const aux = wire.aux;
+		body.push(`wire${i}.twin = wire${twin};`);
 
-			tail = tail.concat("\
-	wire" + i + ".main = tree" + main + ";\n\
-	wire" + i + ".aux = tree" + aux + ";\n");
-		}
+		if (ambtype != wire.type)
+			continue;
+
+		body.push(`wire${i}.main = tree${wire.main};`);
+		body.push(`wire${i}.aux = tree${wire.aux};`);
 	}
-
-	return head.concat("\n", tail, "\n");
 }
 
 function genclone(img)
@@ -288,9 +277,8 @@ function genclone(img)
 		}";
 }
 
-function genqueue(img)
+function genqueue(body, img)
 {
-	const queue = [];
 	const ilen = img.length;
 
 	for (let i = 0; i < ilen; i++) {
@@ -298,34 +286,40 @@ function genqueue(img)
 		const left = genclone(pair.left);
 		const right = genclone(pair.right);
 
-		queue.push("flush(" + left + "," + right + ");");
+		body.push(`flush(${left}, ${right});`);
 	}
-
-	return queue.join("\n");
 }
 
 function generate(img, wlist, alist, effect, rl)
 {
 	const left = rl ? "right" : "left";
 	const right = rl ? "left" : "right";
-	const body = "\
-	const lval = " + left + ".data;\n\
-	const rval = " + right + ".data;\n\n\
-	if (!(" + geneff(effect) + "))\n\
-		return;\n\n\
-	const lpax = left.pax;\n\
-	const rpax = right.pax;\n\n\
-	left.parent = void(0);\n\
-	left.data = void(0);\n\
-	left.pax = void(0);\n\
-	right.parent = void(0);\n\
-	right.data = void(0);\n\
-	right.pax = void(0);\n\
-	" + gentwins(wlist, alist) + "\
-	" + genqueue(img) + "\n\
-	return true;";
+	const body = ["/* Generated code below. */"];
 
-	return new Function("flush", "left", "right", body);
+	gentwins(body, wlist, alist);
+	genqueue(body, img);
+
+	return new Function("flush", "left", "right", `
+		const lval = ${left}.data;
+		const rval = ${right}.data;
+
+		if (!${geneff(effect)})
+			return;
+
+		const lpax = left.pax;
+		const rpax = right.pax;
+
+		left.parent = void(0);
+		left.data = void(0);
+		left.pax = void(0);
+		right.parent = void(0);
+		right.data = void(0);
+		right.pax = void(0);
+
+		${body.join("\n")}
+
+		return true;
+	`);
 }
 
 function apply(left, right, code, rl)
