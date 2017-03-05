@@ -121,17 +121,14 @@ function generate(img, wlist, alist, effect, rl)
 
 function mkeffect(lval, rval, code, expr)
 {
-	let body = expr ? "return (%s);" : "%s\n\treturn true;";
+	const left = lval ? lval : "LVAL";
+	const right = rval ? rval : "RVAL";
 
-	if (!lval)
-		lval = "LVAL";
-	if (!rval)
-		rval = "RVAL";
-	if (!code && expr)
-		code = "void(0)";
-
-	body = body.replace("%s", code);
-	return new Function(lval, rval, body);
+	return new Function(left, right, expr ? `
+		return ${code ? code : "void(0)"};
+	` : `${code}
+		return true;
+	`);
 }
 
 exports.generate = generate;
