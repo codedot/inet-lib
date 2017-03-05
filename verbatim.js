@@ -87,7 +87,7 @@ function genqueue(body, img)
 	}
 }
 
-function verbatim(img, wlist, alist, effect, rl)
+function generate(img, wlist, alist, effect, rl)
 {
 	const left = rl ? "right" : "left";
 	const right = rl ? "left" : "right";
@@ -119,4 +119,20 @@ function verbatim(img, wlist, alist, effect, rl)
 	`);
 }
 
-module.exports = verbatim;
+function mkeffect(lval, rval, code, expr)
+{
+	let body = expr ? "return (%s);" : "%s\n\treturn true;";
+
+	if (!lval)
+		lval = "LVAL";
+	if (!rval)
+		rval = "RVAL";
+	if (!code && expr)
+		code = "void(0)";
+
+	body = body.replace("%s", code);
+	return new Function(lval, rval, body);
+}
+
+exports.generate = generate;
+exports.mkeffect = mkeffect;

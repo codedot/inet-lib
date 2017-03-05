@@ -1,9 +1,11 @@
 "use strict";
 
-const verbatim = require("./verbatim");
 const compile = require("./compile");
+const verbatim = require("./verbatim");
 
 const parser = new compile.Parser();
+const generate = verbatim.generate;
+const mkeffect = verbatim.mkeffect;
 
 const ambtype = 1;
 const wiretype = 0;
@@ -146,21 +148,6 @@ function mreted(agent, amb)
 	return determ(amb, agent);
 }
 
-function mkeffect(lval, rval, code, expr)
-{
-	let body = expr ? "return (%s);" : "%s\n\treturn true;";
-
-	if (!lval)
-		lval = "LVAL";
-	if (!rval)
-		rval = "RVAL";
-	if (!code && expr)
-		code = "void(0)";
-
-	body = body.replace("%s", code);
-	return new Function(lval, rval, body);
-}
-
 function prequeue(queue, side, lval, rval, pax, wires)
 {
 	const plen = pax.length;
@@ -250,7 +237,7 @@ function apply(left, right, code, rl)
 		}
 	}
 
-	interact = verbatim(oimg, wlist, alist, effect, rl);
+	interact = generate(oimg, wlist, alist, effect, rl);
 	interact = interact.bind(inenv, flush);
 	interact.human = human;
 	return interact;
