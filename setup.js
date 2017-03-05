@@ -42,7 +42,6 @@ function indwire(wire, agent)
 	wire.twin = void(0);
 	agent.parent = void(0);
 	agent.twin = void(0);
-	return true;
 }
 
 function inderiw(agent, wire)
@@ -73,7 +72,6 @@ function indamb(wire, agent)
 	agent.twin = void(0);
 	agent.main = void(0);
 	agent.aux = void(0);
-	return true;
 }
 
 function indbma(agent, wire)
@@ -99,7 +97,6 @@ function indagent(wire, agent)
 	agent.parent = void(0);
 	agent.data = void(0);
 	agent.pax = void(0);
-	return true;
 }
 
 function indtnega(agent, wire)
@@ -141,7 +138,6 @@ function determ(amb, agent)
 
 	flush(amb, aux);
 	flush(main, agent);
-	return true;
 }
 
 function mreted(agent, amb)
@@ -506,8 +502,6 @@ function traverse(list, pair)
 			if (rule(left, right))
 				return true;
 		}
-
-		return false;
 	}
 
 	compound.human = pair;

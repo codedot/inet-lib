@@ -57,8 +57,6 @@ function debug0()
 		reduce(pair);
 		return true;
 	}
-
-	return false;
 }
 
 function debug1()
