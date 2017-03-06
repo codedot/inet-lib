@@ -243,21 +243,19 @@ function apply(left, right, code, rl)
 	return interact;
 }
 
-function adopt(parent, agent)
+function adopt(agent, parent)
 {
-	if (!agent.parent) {
-		const type = agent.type;
+	const type = agent.type;
 
-		if (ambtype == type) {
-			adopt(agent, agent.main);
-			adopt(agent, agent.aux);
-		} else if (wiretype != type) {
-			const pax = agent.pax;
-			const plen = pax.length;
+	if (ambtype == type) {
+		adopt(agent.main, agent);
+		adopt(agent.aux, agent);
+	} else if (wiretype != type) {
+		const pax = agent.pax;
+		const plen = pax.length;
 
-			for (let i = 0; i < plen; i++)
-				adopt(agent, pax[i]);
-		}
+		for (let i = 0; i < plen; i++)
+			adopt(pax[i], agent);
 	}
 
 	agent.parent = parent;
@@ -279,8 +277,8 @@ function flush(left, right)
 			rule: rule
 		};
 
-		adopt(pair, left);
-		adopt(pair, right);
+		left.parent = pair;
+		right.parent = pair;
 
 		inqueue.push(pair);
 	}
@@ -473,6 +471,9 @@ function setup(src, env)
 	queue.forEach(pair => {
 		const left = pair.left;
 		const right = pair.right;
+
+		adopt(left);
+		adopt(right);
 
 		flush(left, right);
 	});
