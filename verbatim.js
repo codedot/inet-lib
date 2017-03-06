@@ -33,14 +33,20 @@ function gentwins(body, wlist, alist)
 	for (let i = 0; i < wlen; i++) {
 		const wire = wlist[i];
 		const twin = wire.twin.id;
+		let main, aux;
 
 		body.push(`wire${i}.twin = wire${twin};`);
 
 		if (ambtype != wire.type)
 			continue;
 
-		body.push(`wire${i}.main = tree${wire.main};`);
-		body.push(`wire${i}.aux = tree${wire.aux};`);
+		main = wire.main;
+		body.push(`wire${i}.main = tree${main};`);
+		body.push(`tree${main}.parent = wire${i};`);
+
+		aux = wire.aux;
+		body.push(`wire${i}.aux = tree${aux};`);
+		body.push(`tree${aux}.parent = wire${i};`);
 	}
 }
 
@@ -63,17 +69,23 @@ function genclone(body, img)
 	if (ambtype == type)
 		return `wire${img.id}`;
 
-	iplen = imgpax.length;
-	for (let i = 0; i < iplen; i++)
-		pax[i] = genclone(body, imgpax[i]);
-
 	node = `node${body.nnodes}`;
 	body.push(`const ${node} = {
 		type: ${type},
-		pax: [${pax.join(", ")}],
 		data: ${geneff(img.effect)}
 	};`);
 	++body.nnodes;
+
+	iplen = imgpax.length;
+	for (let i = 0; i < iplen; i++) {
+		const child = genclone(body, imgpax[i]);
+
+		pax[i] = child;
+
+		body.push(`${child}.parent = ${node};`);
+	}
+
+	body.push(`${node}.pax = [${pax.join(", ")}];`);
 
 	return node;
 }
