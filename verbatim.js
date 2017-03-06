@@ -49,7 +49,7 @@ function genclone(body, img)
 	const type = img.type;
 	const imgpax = img.pax;
 	const pax = [];
-	let iplen;
+	let iplen, node;
 
 	if (lpaxtype == type)
 		return `lpax[${img.id}]`;
@@ -67,11 +67,15 @@ function genclone(body, img)
 	for (let i = 0; i < iplen; i++)
 		pax[i] = genclone(body, imgpax[i]);
 
-	return `{
+	node = `node${body.nnodes}`;
+	body.push(`const ${node} = {
 		type: ${type},
 		pax: [${pax.join(", ")}],
 		data: ${geneff(img.effect)}
-	}`;
+	};`);
+	++body.nnodes;
+
+	return node;
 }
 
 function genqueue(body, img)
@@ -93,6 +97,7 @@ function generate(img, wlist, alist, effect, rl)
 	const right = rl ? "left" : "right";
 	const body = ["/* Generated code below. */"];
 
+	body.nnodes = 0;
 	gentwins(body, wlist, alist);
 	genqueue(body, img);
 
