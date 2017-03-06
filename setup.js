@@ -66,8 +66,8 @@ function indamb(wire, agent)
 	dst.main = main;
 	dst.aux = aux;
 
-	adopt(dst, main);
-	adopt(dst, aux);
+	main.parent = dst;
+	aux.parent = dst;
 
 	wire.parent = void(0);
 	wire.twin = void(0);
@@ -93,7 +93,7 @@ function indagent(wire, agent)
 	dst.pax = pax;
 
 	for (let i = 0; i < plen; i++)
-		adopt(dst, pax[i]);
+		pax[i].parent = dst;
 
 	wire.parent = void(0);
 	wire.twin = void(0);
