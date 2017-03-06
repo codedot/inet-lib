@@ -136,6 +136,7 @@ function determ(amb, agent)
 	amb.type = wiretype;
 	amb.main = void(0);
 	amb.aux = void(0);
+	twin.type = wiretype;
 	twin.main = void(0);
 	twin.aux = void(0);
 
