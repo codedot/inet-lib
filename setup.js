@@ -296,6 +296,14 @@ function addrule(dict, rule)
 		dict[human] = [rule];
 }
 
+function copyamb(dst, src)
+{
+	dst.need = src.need;
+	dst.type = src.type;
+	dst.main = src.main;
+	dst.aux = src.aux;
+}
+
 function encode(lval, rval, root, wires, rt)
 {
 	const node = root.node;
@@ -316,10 +324,7 @@ function encode(lval, rval, root, wires, rt)
 			wire.twin = tree;
 			tree.twin = wire;
 
-			tree.need = wire.need;
-			tree.type = wire.type;
-			tree.main = wire.main;
-			tree.aux = wire.aux;
+			copyamb(tree, wire);
 		}
 
 		wires[name] = tree;
@@ -330,18 +335,17 @@ function encode(lval, rval, root, wires, rt)
 		const main = pax.shift();
 		const aux = pax.shift();
 		const twin = wire.twin;
+		const tree = {
+			need: need,
+			type: type,
+			main: main,
+			aux: aux
+		};
 
-		wire.need = need;
-		wire.type = type;
-		wire.main = main;
-		wire.aux = aux;
+		copyamb(wire, tree);
 
-		if (twin) {
-			twin.need = need;
-			twin.type = type;
-			twin.main = main;
-			twin.aux = aux;
-		}
+		if (twin)
+			copyamb(twin, tree);
 
 		return wire;
 	} else {
