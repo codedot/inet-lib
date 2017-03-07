@@ -166,32 +166,6 @@ function prequeue(queue, side, lval, rval, pax, wires)
 	}
 }
 
-function optimize(queue)
-{
-	const needed = [];
-	const qlen = queue.length;
-
-	for (let i = 0; i < qlen; i++) {
-		const pair = queue[i];
-		const pax = pair.left;
-		const wire = pair.right;
-		const twin = wire.twin;
-
-		if (wiretype != wire.type) {
-			needed.push(pair);
-			continue;
-		}
-
-		twin.type = pax.type;
-		twin.id = pax.id;
-
-		wire.junk = true;
-		twin.junk = true;
-	}
-
-	return needed;
-}
-
 function apply(left, right, code, rl)
 {
 	const lnode = left.node;
@@ -204,19 +178,14 @@ function apply(left, right, code, rl)
 	const wires = {};
 	const wlist = [];
 	const alist = [];
-	let oimg, interact;
+	let interact;
 
 	prequeue(img, lpaxtype, lval, rval, left.pax, wires);
 	prequeue(img, rpaxtype, lval, rval, right.pax, wires);
 
-	oimg = optimize(img);
-
 	for (const name in wires) {
 		const wire = wires[name];
 		const twin = wire.twin;
-
-		if (wire.junk)
-			continue;
 
 		wire.id = wlist.length;
 		wlist.push(wire);
@@ -238,7 +207,7 @@ function apply(left, right, code, rl)
 		}
 	}
 
-	interact = generate(oimg, wlist, alist, effect, rl);
+	interact = generate(img, wlist, alist, effect, rl);
 	interact = interact.bind(inenv, flush);
 	interact.human = human;
 	return interact;
