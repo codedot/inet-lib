@@ -299,6 +299,7 @@ function addrule(dict, rule)
 function encode(lval, rval, root, wires, rt)
 {
 	const node = root.node;
+	const need = node.need;
 	const type = types[node.agent];
 	const pax = root.pax.map(sub => {
 		return encode(lval, rval, sub, wires, rt);
@@ -315,6 +316,7 @@ function encode(lval, rval, root, wires, rt)
 			wire.twin = tree;
 			tree.twin = wire;
 
+			tree.need = wire.need;
 			tree.type = wire.type;
 			tree.main = wire.main;
 			tree.aux = wire.aux;
@@ -329,11 +331,13 @@ function encode(lval, rval, root, wires, rt)
 		const aux = pax.shift();
 		const twin = wire.twin;
 
+		wire.need = need;
 		wire.type = type;
 		wire.main = main;
 		wire.aux = aux;
 
 		if (twin) {
+			twin.need = need;
 			twin.type = type;
 			twin.main = main;
 			twin.aux = aux;
@@ -344,6 +348,7 @@ function encode(lval, rval, root, wires, rt)
 		const code = node.code;
 		const effect = mkeffect(lval, rval, code, true);
 		const tree = {
+			need: need,
 			type: type,
 			pax: pax
 		};
