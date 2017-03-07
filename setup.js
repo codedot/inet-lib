@@ -239,27 +239,30 @@ function adopt(agent, parent)
 	return need;
 }
 
+function addpair(left, right, rule)
+{
+	const pair = {
+		type: eqntype,
+		left: left,
+		right: right,
+		rule: rule
+	};
+
+	left.parent = pair;
+	right.parent = pair;
+
+	inqueue.push(pair);
+}
+
 function flush(left, right)
 {
 	const row = table[left.type];
 	const rule = row[right.type];
 
-	if (rule.pseudo) {
+	if (rule.pseudo)
 		rule(left, right);
-		return;
-	} else {
-		const pair = {
-			type: eqntype,
-			left: left,
-			right: right,
-			rule: rule
-		};
-
-		left.parent = pair;
-		right.parent = pair;
-
-		inqueue.push(pair);
-	}
+	else
+		addpair(left, right, rule);
 }
 
 function addrule(dict, rule)
