@@ -296,30 +296,20 @@ function addrule(dict, rule)
 		dict[human] = [rule];
 }
 
-function encode(lval, rval, tree, wires, rt)
+function encode(lval, rval, root, wires, rt)
 {
-	const node = tree.node;
-	const code = node.code;
-	const agent = node.agent;
-	const type = types[agent];
-	const pax = tree.pax;
-	const plen = pax.length;
-	const imgpax = [];
-
-	for (let i = 0; i < plen; i++) {
-		const sub = pax[i];
-
-		imgpax[i] = encode(lval, rval, sub, wires, rt);
-	}
-
-	tree = {
-		type: type,
-		pax: imgpax
-	};
+	const node = root.node;
+	const type = types[node.agent];
+	const pax = root.pax.map(sub => {
+		return encode(lval, rval, sub, wires, rt);
+	});
 
 	if (wiretype == type) {
 		const name = node.name;
 		const wire = wires[name];
+		const tree = {
+			type: type
+		};
 
 		if (wire) {
 			wire.twin = tree;
@@ -330,14 +320,14 @@ function encode(lval, rval, tree, wires, rt)
 			tree.aux = wire.aux;
 		}
 
-		delete tree.pax;
-
 		wires[name] = tree;
+
+		return tree;
 	} else if (ambtype == type) {
-		const wire = imgpax.shift();
+		const wire = pax.shift();
+		const main = pax.shift();
+		const aux = pax.shift();
 		const twin = wire.twin;
-		const main = imgpax.shift();
-		const aux = imgpax.shift();
 
 		wire.type = type;
 		wire.main = main;
@@ -351,15 +341,20 @@ function encode(lval, rval, tree, wires, rt)
 
 		return wire;
 	} else {
+		const code = node.code;
 		const effect = mkeffect(lval, rval, code, true);
+		const tree = {
+			type: type,
+			pax: pax
+		};
 
 		if (rt)
 			tree.data = effect.call(inenv);
 		else
 			tree.effect = effect;
-	}
 
-	return tree;
+		return tree;
+	}
 }
 
 function traverse(list, pair)
