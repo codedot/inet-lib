@@ -216,19 +216,27 @@ function apply(left, right, code, rl)
 function adopt(agent, parent)
 {
 	const type = agent.type;
+	let need = agent.need;
 
 	if (ambtype == type) {
-		adopt(agent.main, agent);
-		adopt(agent.aux, agent);
+		if (adopt(agent.main, agent))
+			need = true;
+
+		if (adopt(agent.aux, agent))
+			need = true;
 	} else if (wiretype != type) {
 		const pax = agent.pax;
 		const plen = pax.length;
 
 		for (let i = 0; i < plen; i++)
-			adopt(pax[i], agent);
+			if (adopt(pax[i], agent))
+				need = true;
 	}
 
 	agent.parent = parent;
+
+	agent.need = need;
+	return need;
 }
 
 function flush(left, right)
