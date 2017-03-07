@@ -20,7 +20,7 @@
 "(" return "(";
 ")" return ")";
 "," return ",";
-"!" return "!";
+<CONF>"!" return "!";
 "\\" return "\\";
 "_" return "_";
 <CONF>"=" return "=";
