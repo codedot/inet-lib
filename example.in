@@ -230,7 +230,7 @@
 
 $$
 
-\eval(\read_{this.mkhole()}(\print)) = root;
+\eval(\read_{this.mkhole()}(!print)) = root;
 w37 = \apply(w38, root);
 w37 = \lambda(w1, w39);
 w40 = \apply(w41, w39);

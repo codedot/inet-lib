@@ -132,7 +132,7 @@
 
 $$
 
-\read_{this.mkhole()}(\print) = root;
+\read_{this.mkhole()}(!print) = root;
 root = \lambda(w1, w3);
 w3 = \apply(w4, w5);
 w4 = \apply(w6, w7);
