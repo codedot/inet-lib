@@ -18,8 +18,6 @@ let inqueue, inenv, ntypes, types, table;
 function addtypes(tree)
 {
 	const agent = tree.node.agent;
-	const pax = tree.pax;
-	const plen = pax.length;
 
 	if ("wire" == agent)
 		return;
@@ -29,8 +27,9 @@ function addtypes(tree)
 		++ntypes;
 	}
 
-	for (let i = 0; i < plen; i++)
-		addtypes(pax[i]);
+	tree.pax.forEach(sub => {
+		addtypes(sub);
+	});
 }
 
 function indwire(wire, agent)
@@ -244,12 +243,10 @@ function adopt(agent, parent)
 		if (adopt(agent.aux, agent))
 			need = true;
 	} else if (wiretype != type) {
-		const pax = agent.pax;
-		const plen = pax.length;
-
-		for (let i = 0; i < plen; i++)
-			if (adopt(pax[i], agent))
+		agent.pax.forEach(tree => {
+			if (adopt(tree, agent))
 				need = true;
+		});
 	}
 
 	agent.parent = parent;
