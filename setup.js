@@ -115,10 +115,22 @@ function indtnega(agent, wire)
 function delegate(node)
 {
 	do {
+		const type = node.type;
+
 		node.need = true;
 
-		if (eqntype == node.type)
+		if (eqntype == type) {
 			inqueue.push(node);
+			return;
+		}
+
+		if (ambtype == type) {
+			const twin = node.twin;
+
+			twin.need = true;
+
+			delegate(twin.parent);
+		}
 
 		node = node.parent;
 	} while (node && !node.need);
