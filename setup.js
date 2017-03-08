@@ -118,8 +118,8 @@ function delegate(node)
 	do {
 		node.need = true;
 
-		if (ambtype == node.type)
-			delegate(node.twin);
+		if (eqntype == node.type)
+			inqueue.push(node);
 
 		node = node.parent;
 	} while (node && !node.need);
@@ -269,7 +269,8 @@ function addpair(left, right, rule)
 	left.parent = pair;
 	right.parent = pair;
 
-	inqueue.push(pair);
+	if (left.need || right.need)
+		inqueue.push(pair);
 }
 
 function flush(left, right)
