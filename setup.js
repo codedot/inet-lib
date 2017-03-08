@@ -257,7 +257,9 @@ function adopt(agent, parent)
 
 function addpair(left, right, rule)
 {
+	const need = left.need || right.need;
 	const pair = {
+		need: need,
 		type: eqntype,
 		left: left,
 		right: right,
@@ -267,7 +269,7 @@ function addpair(left, right, rule)
 	left.parent = pair;
 	right.parent = pair;
 
-	if (left.need || right.need)
+	if (need)
 		inqueue.push(pair);
 }
 
