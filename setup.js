@@ -167,23 +167,25 @@ function mreted(agent, amb)
 	return determ(amb, agent);
 }
 
-function prequeue(queue, side, lval, rval, pax, wires)
+function getqueue(lval, rval, left, right, wires)
 {
-	const plen = pax.length;
+	const getpair = type => (tree, i) => {
+		tree = encode(lval, rval, tree, wires);
 
-	for (let i = 0; i < plen; i++) {
-		const img = encode(lval, rval, pax[i], wires);
+		adopt(tree);
 
-		adopt(img);
-
-		queue.push({
+		return {
 			left: {
-				type: side,
+				type: type,
 				id: i
 			},
-			right: img
-		});
-	}
+			right: tree
+		};
+	};
+
+	left = left.pax.map(getpair(lpaxtype));
+	right = right.pax.map(getpair(rpaxtype));
+	return left.concat(right);
 }
 
 function apply(left, right, code, rl)
@@ -194,14 +196,11 @@ function apply(left, right, code, rl)
 	const lval = rl ? rnode.code : lnode.code;
 	const rval = rl ? lnode.code : rnode.code;
 	const effect = mkeffect(lval, rval, code);
-	const img = [];
 	const wires = {};
 	const wlist = [];
 	const alist = [];
+	const img = getqueue(lval, rval, left, right, wires);
 	let interact;
-
-	prequeue(img, lpaxtype, lval, rval, left.pax, wires);
-	prequeue(img, rpaxtype, lval, rval, right.pax, wires);
 
 	for (const name in wires) {
 		const wire = wires[name];
