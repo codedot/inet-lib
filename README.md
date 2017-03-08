@@ -1,15 +1,10 @@
 This package provides an engine for evaluation of
 interaction nets encoded in a language that is similar to
-interaction calculus but lacks the notion of interface, or
-interaction net's root.
-Interaction rules are defined using Yves Lafont's notation.
+the refined interaction calculus as described in
+[arXiv:1702.06092](https://arxiv.org/abs/1702.06092).
 Implementation implicitly extends interaction systems with
 McCarthy's _amb_ as a nondeterministic agent and also allows
 side effects written in JavaScript.
-A rather informal brief introduction to interaction nets and
-their textual representation called the interaction calculus
-can be found in Section 2 of
-[10.4204/EPTCS.225.7](http://dx.doi.org/10.4204/EPTCS.225.7).
 
 # Demo
 
