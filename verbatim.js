@@ -46,9 +46,7 @@ function gentwins(body, wlist, alist)
 function genclone(body, img)
 {
 	const type = img.type;
-	const imgpax = img.pax;
-	const pax = [];
-	let iplen, node;
+	let pax, node;
 
 	if (lpaxtype == type)
 		return `lpax[${img.id}]`;
@@ -69,14 +67,13 @@ function genclone(body, img)
 	};`);
 	++body.nnodes;
 
-	iplen = imgpax.length;
-	for (let i = 0; i < iplen; i++) {
-		const child = genclone(body, imgpax[i]);
-
-		pax[i] = child;
+	pax = img.pax.map(child => {
+		child = genclone(body, child);
 
 		body.push(`${child}.parent = ${node};`);
-	}
+
+		return child;
+	});
 
 	body.push(`${node}.pax = [${pax.join(", ")}];`);
 
