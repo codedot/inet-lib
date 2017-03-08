@@ -1,17 +1,17 @@
-\print {
-	/* Continue evaluation. */
-	++this.total;
-} \wait[\print, \call];
-
 \eval[\fan_{i}(a, b)] {
 	/* Postpone evaluation. */
 	++this.total;
 } \fan_{i}[a, b];
 
-\eval[\scope_{i}(a)] {
-	/* Evaluate delimiter. */
+\eval[\box_{i}(a)] {
+	/* Evaluate bracket. */
 	++this.total;
-} \scope_{i}[\eval(a)];
+} \box_{i}[\eval(a)];
+
+\eval[\var_{i}(a)] {
+	/* Evaluate croissant. */
+	++this.total;
+} \var_{i}[\eval(a)];
 
 \eval[a] {
 	/* Continue evaluation. */
@@ -23,74 +23,169 @@
 	++this.total;
 } \atom_{M};
 
-\eval[\lambda(a, b)] {
+\eval[\lambda_{i}(a, b)] {
 	/* Evaluate abstraction. */
 	++this.total;
-} \lambda[a, b];
+} \lambda_{i}[a, \eval(b)];
 
-\fan_{i}[\scope_{j}(a), \scope_{j}(b)] {
-	/* Duplicate higher delimiter. */
+\var_{i}[\fan_{j - 1}(a, b)] {
+	/* Level down higher fan. */
 	if (i < j)
 		++this.total;
 	else
 		return false;
-} \scope_{j}[\fan_{i}(a, b)];
+} \fan_{j}[\var_{i}(a), \var_{i}(b)];
 
-\scope_{i}[\fan_{j + 1}(a, b)] {
-	/* Level up higher or matching fan. */
-	if (i <= j)
-		++this.total;
-	else
-		return false;
-} \fan_{j}[\scope_{i}(a), \scope_{i}(b)];
-
-\scope_{i}[\scope_{j + 1}(a)] {
-	/* Level up higher delimiter. */
+\fan_{i}[\var_{j}(a), \var_{j}(b)] {
+	/* Duplicate higher croissant. */
 	if (i < j)
 		++this.total;
 	else
 		return false;
-} \scope_{j}[\scope_{i}(a)];
+} \var_{j}[\fan_{i}(a, b)];
+
+\fan_{i}[\box_{j}(a), \box_{j}(b)] {
+	/* Duplicate higher bracket. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \box_{j}[\fan_{i}(a, b)];
+
+\box_{i}[\fan_{j + 1}(a, b)] {
+	/* Level up higher fan. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \fan_{j}[\box_{i}(a), \box_{i}(b)];
+
+\box_{i}[\box_{j + 1}(a)] {
+	/* Level up higher bracket. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \box_{j}[\box_{i}(a)];
+
+\var_{i}[\var_{j - 1}(a)] {
+	/* Level down higher bracket. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \var_{j}[\var_{i}(a)];
+
+\var_{i}[\box_{j - 1}(a)] {
+	/* Level down higher bracket. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \box_{j}[\var_{i}(a)];
+
+\box_{i}[\var_{j + 1}(a)] {
+	/* Level up higher croissant. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \var_{j}[\box_{i}(a)];
 
 \print {
-	/* Ignore delimiter. */
+	/* Ignore bracket. */
 	++this.total;
-} \scope_{i}[\print];
+} \box_{i}[\print];
 
-\read_{C}[\scope_{i}(a)] {
+\read_{C}[\box_{i}(a)] {
 	/* Pass through context. */
 	++this.total;
-} \scope_{i}[\read_{C}(a)];
+} \box_{i}[\read_{C}(a)];
 
-\scope_{i}[a] {
-	/* Annihilate matching delimiters. */
+\var_{i}[a] {
+	/* Annihilate matching croissants. */
 	if (i == j)
 		++this.total;
 	else
 		return false;
-} \scope_{j}[a];
+} \var_{j}[a];
 
-\scope_{i}[\apply(a, b)] {
-	/* Pass through application. */
-	++this.total;
-} \apply[\scope_{i}(a), \scope_{i}(b)];
+\box_{i}[a] {
+	/* Annihilate matching brackets. */
+	if (i == j)
+		++this.total;
+	else
+		return false;
+} \box_{j}[a];
 
-\scope_{i}[\lambda(a, b)] {
-	/* Level up delimiter. */
+\box_{i}[\apply_{j + 1}(a, b)] {
+	/* Level up higher application. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \apply_{j}[\box_{i}(a), \box_{i}(b)];
+
+\box_{i}[\lambda_{j + 1}(a, b)] {
+	/* Level up higher abstraction. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \lambda_{j}[\box_{i}(a), \box_{i}(b)];
+
+\print {
+	/* Ignore croissant. */
 	++this.total;
-} \lambda[\scope_{i + 1}(a), \scope_{i + 1}(b)];
+} \var_{i}[\print];
+
+\read_{C}[\var_{i}(a)] {
+	/* Pass through context. */
+	++this.total;
+} \var_{i}[\read_{C}(a)];
+
+\var_{i}[\apply_{j - 1}(a, b)] {
+	/* Level down higher application. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \apply_{j}[\var_{i}(a), \var_{i}(b)];
+
+\var_{i}[\lambda_{j - 1}(a, b)] {
+	/* Level down higher abstraction. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \lambda_{j}[\var_{i}(a), \var_{i}(b)];
 
 \erase {
-	/* Erase delimiter. */
+	/* Erase croissant. */
 	++this.total;
-} \scope_{i}[\erase];
+} \var_{i}[\erase];
 
-\scope_{i}[\wait(a, b)] {
-	/* Postpone delimiter. */
+\erase {
+	/* Erase bracket. */
 	++this.total;
-} \wait[\scope_{i}(a), b];
+} \box_{i}[\erase];
 
-\scope_{i}[\atom_{M}] {
+\var_{i}[\wait(a, b)] {
+	/* Postpone croissant. */
+	++this.total;
+} \wait[\var_{i}(a), b];
+
+\box_{i}[\wait(a, b)] {
+	/* Postpone bracket. */
+	++this.total;
+} \wait[\box_{i}(a), b];
+
+\var_{i}[\atom_{M}] {
+	/* Return an atom. */
+	++this.total;
+} \atom_{M};
+
+\box_{i}[\atom_{M}] {
 	/* Return an atom. */
 	++this.total;
 } \atom_{M};
@@ -140,7 +235,7 @@
 	++this.total;
 } \wait[\erase, \erase];
 
-\apply[a, \wait(b, \hold(\apply(a, b), \wait(c, d)))] {
+\apply_{i}[a, \wait(b, \hold(\apply_{i}(a, b), \wait(c, d)))] {
 	/* Postpone application. */
 	++this.total;
 } \wait[c, d];
@@ -154,9 +249,9 @@
 \read_{C}[a] {
 	/* Read back abstraction. */
 	++this.total;
-} \lambda[\atom_{this.mkid()}, \read_{this.abst(C)}(a)];
+} \lambda_{i}[\atom_{this.mkid()}, \read_{this.abst(C)}(a)];
 
-\apply[\read_{this.appl(M)}(a), a] {
+\apply_{i}[\read_{this.appl(M)}(a), a] {
 	/* Read back application. */
 	++this.total;
 } \atom_{M};
@@ -171,21 +266,29 @@
 	++this.total;
 } \atom_{M};
 
-\apply[a, \scope_{0}(b)] {
-	/* Apply beta reduction. */
-	++this.beta;
-	++this.total;
-} \lambda[\wait(c, \hold(\scope_{0}(c), a)), b];
+\apply_{i}[a, b] {
+	/* Annihilate matching abstraction and application. */
+	if (i == j)
+		++this.beta;
+	else
+		return false;
+} \lambda_{j}[\wait(c, \hold(c, a)), b];
 
-\fan_{i}[\apply(a, b), \apply(c, d)] {
-	/* Duplicate application. */
-	++this.total;
-} \apply[\fan_{i}(a, c), \fan_{i}(b, d)];
+\fan_{i}[\apply_{j}(a, b), \apply_{j}(c, d)] {
+	/* Duplicate higher application. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \apply_{j}[\fan_{i}(a, c), \fan_{i}(b, d)];
 
-\fan_{i}[\lambda(a, b), \lambda(c, d)] {
-	/* Level up fan. */
-	++this.total;
-} \lambda[\fan_{i + 1}(a, c), \fan_{i + 1}(b, d)];
+\fan_{i}[\lambda_{j}(a, b), \lambda_{j}(c, d)] {
+	/* Duplicate higher abstraction. */
+	if (i < j)
+		++this.total;
+	else
+		return false;
+} \lambda_{j}[\fan_{i}(a, c), \fan_{i}(b, d)];
 
 \fan_{i}[a, b] {
 	/* Annihilate matching fans. */
@@ -211,12 +314,12 @@
 \erase {
 	/* Erase application. */
 	++this.total;
-} \apply[\erase, \erase];
+} \apply_{i}[\erase, \erase];
 
 \erase {
 	/* Erase abstraction. */
 	++this.total;
-} \lambda[\erase, \erase];
+} \lambda_{i}[\erase, \erase];
 
 \erase {
 	/* Erase duplicator. */
@@ -230,145 +333,358 @@
 
 $$
 
+w73 = \apply_{0}(w74, root);
+w73 = \lambda_{0}(w1, w75);
+w76 = \apply_{0}(w77, w75);
+w76 = \lambda_{0}(w2, w78);
+w79 = \apply_{0}(w80, w78);
+w79 = \lambda_{0}(\erase, w81);
+w82 = \apply_{0}(w83, w81);
+w82 = \lambda_{0}(w4, w87);
+w88 = \apply_{0}(w89, w87);
+w88 = \lambda_{0}(w5, w90);
+w91 = \apply_{0}(w92, w90);
+w91 = \lambda_{0}(\erase, w96);
+w97 = \apply_{0}(w98, w96);
+w97 = \lambda_{0}(\erase, w102);
+w103 = \apply_{0}(w104, w102);
+w103 = \lambda_{0}(\erase, w105);
+w106 = \apply_{0}(w107, w105);
+w106 = \lambda_{0}(\erase, w108);
+w109 = \apply_{0}(w110, w108);
+w109 = \lambda_{0}(w10, w111);
+w112 = \apply_{0}(w113, w111);
+w112 = \lambda_{0}(w11, w114);
+w115 = \apply_{0}(w116, w114);
+w115 = \lambda_{0}(w12, w117);
+w118 = \apply_{0}(w119, w117);
+w118 = \lambda_{0}(\erase, w120);
+w121 = \apply_{0}(w122, w120);
+w121 = \lambda_{0}(w14, w123);
+w124 = \apply_{0}(w125, w123);
+w124 = \lambda_{0}(w15, w126);
+w127 = \apply_{0}(w128, w126);
+w127 = \lambda_{0}(w16, w129);
+w130 = \apply_{0}(w131, w129);
+w130 = \lambda_{0}(w17, w136);
+w137 = \apply_{0}(w138, w136);
+w137 = \lambda_{0}(w18, w142);
+w143 = \apply_{0}(w144, w142);
+w143 = \lambda_{0}(w19, w148);
+w149 = \apply_{0}(w150, w148);
+w149 = \lambda_{0}(w20, w151);
+w152 = \apply_{0}(w153, w151);
+w152 = \lambda_{0}(w21, w155);
+w156 = \apply_{0}(w157, w155);
+w156 = \lambda_{0}(w22, w162);
+w163 = \apply_{0}(w164, w162);
+w163 = \lambda_{0}(w23, w167);
+w168 = \apply_{0}(w169, w167);
+w168 = \lambda_{0}(w24, w173);
+w174 = \apply_{0}(w175, w173);
+w174 = \lambda_{0}(w25, w178);
+w179 = \apply_{0}(w180, w178);
+w182 = \apply_{0}(w183, w179);
+w18 = \var_{0}(w182);
+w184 = \var_{1}(w183);
+w25 = \box_{0}(w184);
+w181 = \var_{1}(w180);
+w24 = \box_{0}(w181);
+w185 = \apply_{1}(w186, w175);
+w190 = \apply_{1}(w191, w185);
+w176 = \var_{1}(w190);
+w192 = \var_{2}(w191);
+w187 = \box_{1}(w192);
+w189 = \var_{2}(w186);
+w188 = \box_{1}(w189);
+w177 = \fan_{1}(w188, w187);
+w16 = \box_{0}(w176);
+w12 = \box_{0}(w177);
+w193 = \apply_{1}(w194, w169);
+w170 = \var_{1}(w193);
+w197 = \apply_{2}(w198, w194);
+w202 = \apply_{2}(w203, w197);
+w195 = \var_{2}(w202);
+w204 = \var_{3}(w203);
+w199 = \box_{2}(w204);
+w201 = \var_{3}(w198);
+w200 = \box_{2}(w201);
+w196 = \fan_{2}(w200, w199);
+w171 = \box_{1}(w195);
+w172 = \box_{1}(w196);
+w23 = \box_{0}(w170);
+w14 = \box_{0}(w171);
+w11 = \box_{0}(w172);
+w205 = \apply_{1}(w206, w164);
+w165 = \var_{1}(w205);
+w207 = \var_{2}(w206);
+w166 = \box_{1}(w207);
+w21 = \box_{0}(w165);
+w22 = \box_{0}(w166);
+w157 = \lambda_{1}(w26, w208);
+w208 = \lambda_{1}(w27, w209);
+w210 = \apply_{1}(w211, w209);
+w218 = \apply_{1}(w219, w210);
+w221 = \apply_{1}(w222, w218);
+w158 = \var_{1}(w221);
+w223 = \var_{2}(w222);
+w212 = \box_{1}(w223);
+w220 = \var_{2}(w219);
+w159 = \box_{1}(w220);
+w224 = \apply_{2}(w225, w211);
+w231 = \apply_{2}(w232, w224);
+w214 = \var_{2}(w231);
+w233 = \var_{3}(w232);
+w226 = \box_{2}(w233);
+w234 = \apply_{3}(w235, w225);
+w228 = \var_{3}(w234);
+w238 = \apply_{4}(w239, w235);
+w236 = \var_{4}(w238);
+w240 = \var_{5}(w239);
+w237 = \box_{4}(w240);
+w229 = \box_{3}(w236);
+w230 = \box_{3}(w237);
+w216 = \box_{2}(w228);
+w217 = \box_{2}(w229);
+w227 = \box_{2}(w230);
+w215 = \fan_{2}(w227, w226);
+w160 = \box_{1}(w214);
+w213 = \box_{1}(w215);
+w26 = \box_{1}(w216);
+w161 = \box_{1}(w217);
+w27 = \fan_{1}(w213, w212);
+w19 = \box_{0}(w158);
+w10 = \box_{0}(w159);
+w15 = \box_{0}(w160);
+w139 = \box_{0}(w161);
+w241 = \apply_{1}(w242, w153);
+w243 = \var_{1}(w241);
+w245 = \var_{2}(w242);
+w244 = \box_{1}(w245);
+w154 = \fan_{1}(w244, w243);
+w20 = \box_{0}(w154);
+w150 = \lambda_{1}(w28, w246);
+w246 = \lambda_{1}(w29, w247);
+w248 = \apply_{1}(w249, w247);
+w250 = \var_{1}(w248);
+w254 = \apply_{2}(w255, w249);
+w257 = \apply_{2}(w258, w254);
+w259 = \var_{2}(w257);
+w261 = \var_{3}(w258);
+w260 = \box_{2}(w261);
+w252 = \fan_{2}(w260, w259);
+w256 = \var_{3}(w255);
+w253 = \box_{2}(w256);
+w28 = \box_{1}(w252);
+w251 = \box_{1}(w253);
+w29 = \fan_{1}(w251, w250);
+w144 = \lambda_{1}(w30, w262);
+w263 = \apply_{1}(w264, w262);
+w266 = \apply_{1}(w267, w263);
+w30 = \var_{1}(w266);
+w270 = \apply_{2}(w271, w267);
+w268 = \var_{2}(w270);
+w272 = \var_{3}(w271);
+w269 = \box_{2}(w272);
+w145 = \box_{1}(w268);
+w146 = \box_{1}(w269);
+w265 = \var_{2}(w264);
+w147 = \box_{1}(w265);
+w132 = \box_{0}(w145);
+w93 = \box_{0}(w146);
+w99 = \box_{0}(w147);
+w138 = \lambda_{1}(w31, w273);
+w273 = \lambda_{1}(w32, w274);
+w275 = \apply_{1}(w276, w274);
+w278 = \apply_{1}(w279, w275);
+w32 = \var_{1}(w278);
+w280 = \var_{2}(w279);
+w141 = \box_{1}(w280);
+w277 = \var_{2}(w276);
+w31 = \box_{1}(w277);
+w140 = \box_{0}(w141);
+w17 = \fan_{0}(w140, w139);
+w131 = \lambda_{1}(w33, w281);
+w281 = \lambda_{1}(w34, w282);
+w282 = \lambda_{1}(w35, w283);
+w284 = \apply_{1}(w285, w283);
+w287 = \apply_{1}(w288, w284);
+w291 = \apply_{1}(w292, w287);
+w33 = \var_{1}(w291);
+w292 = \lambda_{2}(w36, w294);
+w294 = \lambda_{2}(w37, w295);
+w296 = \apply_{2}(w297, w295);
+w37 = \var_{2}(w296);
+w300 = \apply_{3}(w301, w297);
+w298 = \var_{3}(w300);
+w302 = \var_{4}(w301);
+w299 = \box_{3}(w302);
+w36 = \box_{2}(w298);
+w293 = \box_{2}(w299);
+w34 = \box_{1}(w293);
+w303 = \apply_{2}(w304, w288);
+w289 = \var_{2}(w303);
+w305 = \var_{3}(w304);
+w290 = \box_{2}(w305);
+w134 = \box_{1}(w289);
+w35 = \box_{1}(w290);
+w286 = \var_{2}(w285);
+w135 = \box_{1}(w286);
+w133 = \box_{0}(w134);
+w1 = \box_{0}(w135);
+w84 = \fan_{0}(w133, w132);
+w128 = \lambda_{1}(w38, w306);
+w306 = \lambda_{1}(w39, w307);
+w308 = \apply_{1}(w309, w307);
+w39 = \var_{1}(w308);
+w310 = \var_{2}(w309);
+w38 = \box_{1}(w310);
+w125 = \lambda_{1}(w40, w311);
+w311 = \lambda_{1}(w41, w312);
+w312 = \lambda_{1}(w42, w313);
+w314 = \apply_{1}(w315, w313);
+w40 = \var_{1}(w314);
+w318 = \apply_{2}(w319, w315);
+w316 = \var_{2}(w318);
+w320 = \var_{3}(w319);
+w317 = \box_{2}(w320);
+w41 = \box_{1}(w316);
+w42 = \box_{1}(w317);
+w122 = \lambda_{1}(w43, w321);
+w321 = \lambda_{1}(w44, w322);
+w322 = \lambda_{1}(w45, w323);
+w323 = \lambda_{1}(w46, w324);
+w325 = \apply_{1}(w326, w324);
+w332 = \apply_{1}(w333, w325);
+w43 = \var_{1}(w332);
+w334 = \var_{2}(w333);
+w327 = \box_{1}(w334);
+w335 = \apply_{2}(w336, w326);
+w338 = \apply_{2}(w339, w335);
+w329 = \var_{2}(w338);
+w340 = \var_{3}(w339);
+w330 = \box_{2}(w340);
+w337 = \var_{3}(w336);
+w331 = \box_{2}(w337);
+w44 = \box_{1}(w329);
+w328 = \box_{1}(w330);
+w46 = \box_{1}(w331);
+w45 = \fan_{1}(w328, w327);
+w119 = \lambda_{1}(w47, w341);
+w341 = \lambda_{1}(w48, w342);
+w342 = \lambda_{1}(w49, w343);
+w344 = \apply_{1}(w345, w343);
+w346 = \var_{1}(w344);
+w351 = \apply_{2}(w352, w345);
+w354 = \apply_{2}(w355, w351);
+w348 = \var_{2}(w354);
+w356 = \var_{3}(w355);
+w349 = \box_{2}(w356);
+w353 = \var_{3}(w352);
+w350 = \box_{2}(w353);
+w47 = \box_{1}(w348);
+w347 = \box_{1}(w349);
+w49 = \box_{1}(w350);
+w48 = \fan_{1}(w347, w346);
+w116 = \lambda_{1}(w50, w357);
+w357 = \lambda_{1}(w51, w358);
+w359 = \apply_{1}(w360, w358);
+w361 = \var_{1}(w359);
+w365 = \apply_{2}(w366, w360);
+w367 = \var_{2}(w365);
+w371 = \apply_{3}(w372, w366);
+w369 = \var_{3}(w371);
+w373 = \var_{4}(w372);
+w370 = \box_{3}(w373);
+w368 = \box_{2}(w369);
+w364 = \box_{2}(w370);
+w363 = \fan_{2}(w368, w367);
+w362 = \box_{1}(w363);
+w51 = \box_{1}(w364);
+w50 = \fan_{1}(w362, w361);
+w113 = \lambda_{1}(w52, w374);
+w374 = \lambda_{1}(w53, w375);
+w376 = \apply_{1}(w377, w375);
+w378 = \var_{1}(w376);
+w382 = \apply_{2}(w383, w377);
+w380 = \var_{2}(w382);
+w384 = \var_{3}(w383);
+w381 = \box_{2}(w384);
+w379 = \box_{1}(w380);
+w53 = \box_{1}(w381);
+w52 = \fan_{1}(w379, w378);
+w110 = \lambda_{1}(w54, w385);
+w385 = \lambda_{1}(w55, w386);
+w387 = \apply_{1}(w388, w386);
+w54 = \var_{1}(w387);
+w389 = \var_{2}(w388);
+w55 = \box_{1}(w389);
+w107 = \lambda_{1}(\erase, w390);
+w390 = \lambda_{1}(w57, w391);
+w57 = \var_{1}(w391);
+w104 = \lambda_{1}(w58, w392);
+w392 = \lambda_{1}(w59, w393);
+w393 = \lambda_{1}(w60, w394);
+w395 = \apply_{1}(w396, w394);
+w398 = \apply_{1}(w399, w395);
+w58 = \var_{1}(w398);
+w400 = \var_{2}(w399);
+w60 = \box_{1}(w400);
+w397 = \var_{2}(w396);
+w59 = \box_{1}(w397);
+w98 = \lambda_{1}(w61, w401);
+w401 = \lambda_{1}(w62, w402);
+w403 = \apply_{1}(w404, w402);
+w406 = \apply_{1}(w407, w403);
+w61 = \var_{1}(w406);
+w408 = \var_{2}(w407);
+w101 = \box_{1}(w408);
+w405 = \var_{2}(w404);
+w62 = \box_{1}(w405);
+w100 = \box_{0}(w101);
+w4 = \fan_{0}(w100, w99);
+w92 = \lambda_{1}(w63, w409);
+w409 = \lambda_{1}(w64, w410);
+w411 = \apply_{1}(w412, w410);
+w414 = \apply_{1}(w415, w411);
+w63 = \var_{1}(w414);
+w416 = \var_{2}(w415);
+w64 = \box_{1}(w416);
+w413 = \var_{2}(w412);
+w95 = \box_{1}(w413);
+w94 = \box_{0}(w95);
+w5 = \fan_{0}(w94, w93);
+w89 = \lambda_{1}(\erase, w417);
+w417 = \lambda_{1}(w66, w418);
+w66 = \var_{1}(w418);
+w86 = \var_{1}(w83);
+w85 = \box_{0}(w86);
+w2 = \fan_{0}(w85, w84);
+w80 = \lambda_{1}(w67, w419);
+w419 = \lambda_{1}(w68, w420);
+w420 = \lambda_{1}(w69, w421);
+w422 = \apply_{1}(w423, w421);
+w428 = \apply_{1}(w429, w422);
+w67 = \var_{1}(w428);
+w430 = \var_{2}(w429);
+w424 = \box_{1}(w430);
+w431 = \apply_{2}(w432, w423);
+w426 = \var_{2}(w431);
+w433 = \var_{3}(w432);
+w427 = \box_{2}(w433);
+w68 = \box_{1}(w426);
+w425 = \box_{1}(w427);
+w69 = \fan_{1}(w425, w424);
+w77 = \lambda_{1}(w70, w434);
+w434 = \lambda_{1}(\erase, w435);
+w70 = \var_{1}(w435);
+w74 = \lambda_{1}(w72, w436);
+w72 = \var_{1}(w436);
 \eval(\read_{this.mkhole()}(!print)) = root;
-w37 = \apply(w38, root);
-w37 = \lambda(w1, w39);
-w40 = \apply(w41, w39);
-w40 = \lambda(w2, w42);
-w43 = \apply(w44, w42);
-w43 = \lambda(w3, w45);
-w46 = \apply(w47, w45);
-w46 = \lambda(w4, w48);
-w49 = \apply(w50, w48);
-w49 = \lambda(w5, w51);
-w52 = \apply(w53, w51);
-w52 = \lambda(w6, w54);
-w55 = \apply(w56, w54);
-w55 = \lambda(w7, w57);
-w58 = \apply(w59, w57);
-w58 = \lambda(w8, w60);
-w61 = \apply(w62, w60);
-w61 = \lambda(w9, w63);
-w64 = \apply(w65, w63);
-w64 = \lambda(w10, w66);
-w67 = \apply(w68, w66);
-w71 = \apply(w72, w67);
-w9 = \scope_{0}(w71);
-w73 = \apply(w74, w72);
-w4 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w73))))));
-w69 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w74)))));
-w75 = \apply(w76, w68);
-w10 = w75;
-w70 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w76)))));
-w5 = \fan_{0}(w70, w69);
-w65 = \lambda(w11, w77);
-w78 = \apply(w79, w77);
-w82 = \apply(w83, w78);
-w84 = \apply(w85, w82);
-w11 = w84;
-w85 = \lambda(w12, w86);
-w86 = \lambda(w13, w87);
-w88 = \apply(w89, w87);
-w92 = \apply(w93, w88);
-w7 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w92)))));
-w90 = w93;
-w94 = \apply(w95, w89);
-w12 = \scope_{0}(w94);
-w96 = \apply(w97, w95);
-w6 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w96))))));
-w91 = w97;
-w13 = \fan_{0}(w91, w90);
-w83 = \lambda(\erase, w98);
-w80 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w98))))))));
-w81 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w79)))))));
-w3 = \fan_{0}(w81, w80);
-w62 = \lambda(w15, w99);
-w99 = \lambda(w16, w100);
-w101 = \apply(w102, w100);
-w103 = \apply(w104, w101);
-w16 = w103;
-w8 = \scope_{0}(\scope_{0}(w104));
-w15 = \scope_{0}(w102);
-w59 = \lambda(w17, w105);
-w105 = \lambda(w18, w106);
-w106 = \lambda(w19, w107);
-w108 = \apply(w109, w107);
-w110 = \apply(w111, w108);
-w112 = \apply(w113, w110);
-w17 = \scope_{0}(\scope_{0}(w112));
-w113 = \lambda(w20, w114);
-w114 = \lambda(w21, w115);
-w116 = \apply(w117, w115);
-w21 = w116;
-w118 = \apply(w119, w117);
-w20 = \scope_{0}(w118);
-w18 = \scope_{0}(\scope_{0}(\scope_{0}(w119)));
-w120 = \apply(w121, w111);
-w2 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w120))))))));
-w19 = w121;
-w1 = \scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(\scope_{0}(w109)))))))));
-w56 = \lambda(w22, w122);
-w122 = \lambda(w23, w123);
-w123 = \lambda(w24, w124);
-w125 = \apply(w126, w124);
-w22 = \scope_{0}(\scope_{0}(w125));
-w127 = \apply(w128, w126);
-w23 = \scope_{0}(w127);
-w24 = w128;
-w53 = \lambda(w25, w129);
-w129 = \lambda(w26, w130);
-w130 = \lambda(w27, w131);
-w132 = \apply(w133, w131);
-w134 = \scope_{0}(w132);
-w136 = \apply(w137, w133);
-w138 = \apply(w139, w136);
-w25 = \scope_{0}(\scope_{0}(w138));
-w135 = \scope_{0}(w139);
-w27 = w137;
-w26 = \fan_{0}(w135, w134);
-w50 = \lambda(w28, w140);
-w140 = \lambda(w29, w141);
-w142 = \apply(w143, w141);
-w144 = \scope_{0}(w142);
-w146 = \apply(w147, w143);
-w148 = \scope_{0}(w146);
-w150 = \apply(w151, w147);
-w152 = \scope_{0}(w150);
-w154 = \apply(w155, w151);
-w156 = \scope_{0}(w154);
-w158 = \apply(w159, w155);
-w157 = \scope_{0}(w158);
-w29 = w159;
-w153 = \fan_{0}(w157, w156);
-w149 = \fan_{0}(w153, w152);
-w145 = \fan_{0}(w149, w148);
-w28 = \fan_{0}(w145, w144);
-w47 = \lambda(w30, w160);
-w160 = \lambda(w31, w161);
-w162 = \apply(w163, w161);
-w164 = \scope_{0}(w162);
-w166 = \apply(w167, w163);
-w168 = \scope_{0}(w166);
-w170 = \apply(w171, w167);
-w169 = \scope_{0}(w170);
-w31 = w171;
-w165 = \fan_{0}(w169, w168);
-w30 = \fan_{0}(w165, w164);
-w44 = \lambda(w32, w172);
-w172 = \lambda(w33, w173);
-w174 = \apply(w175, w173);
-w32 = \scope_{0}(w174);
-w33 = w175;
-w41 = \lambda(w34, w176);
-w176 = \lambda(\erase, w177);
-w34 = \scope_{0}(w177);
-w38 = \lambda(w36, w178);
-w36 = w178;
 
 $$
 
-const gfv = [];
-let id = 0;
+var id = 0;
 
 function mkvar(fresh)
 {
@@ -380,153 +696,64 @@ function mkvar(fresh)
 
 function mkid(name)
 {
-	const fv = {};
-	const obj = {
+	var obj = {
 		node: "atom",
-		name: name,
-		fv: fv
+		name: name ? name : mkvar(true)
 	};
 
-	if (name) {
-		gfv[name] = true;
-		return obj;
-	}
-
-	do {
-		name = mkvar(true);
-	} while (gfv[name]);
-
-	obj.name = name;
-	fv[name] = true;
 	return obj;
 }
 
 function mkhole()
 {
-	const obj = {};
+	var obj = {};
 
-	obj.fv = {};
-	obj.bv = {};
 	obj.hole = obj;
 	return obj;
 }
 
-function subst(hole, obj)
+function atom(context, obj)
 {
-	const parent = hole.parent;
-	const body = obj.body;
-	const left = obj.left;
-	const right = obj.right;
+	var hole = context.hole;
+	var key;
 
-	if (parent)
-		obj.parent = hole.parent;
-	else
-		delete obj.parent;
+	for (key in obj)
+		hole[key] = obj[key];
 
-	Object.assign(hole, obj);
-
-	if (body)
-		body.parent = hole;
-	if (left)
-		left.parent = hole;
-	if (right)
-		right.parent = hole;
-}
-
-function eta(obj)
-{
-	let parent, left, right, name;
-
-	if ("appl" != obj.node)
-		return;
-
-	parent = obj.parent;
-	if (!parent)
-		return;
-	if ("abst" != parent.node)
-		return;
-
-	right = obj.right;
-	if ("atom" != right.node)
-		return;
-
-	name = parent.var;
-	if (name != right.name)
-		return;
-
-	left = obj.left;
-	if (left.fv[name])
-		return;
-
-	subst(parent, left);
-
-	eta(parent);
-}
-
-function atom(context, obj, name)
-{
-	const ofv = obj.fv;
-	const cfv = context.fv;
-	const bv = context.bv;
-	const chole = context.hole;
-	const ohole = obj.hole;
-
-	if (name)
-		bv[name] = true;
-
-	for (const key in ofv)
-		if (!(key in bv))
-			cfv[key] = true;
-
-	subst(chole, obj);
-
-	if (ohole) {
-		delete chole.hole;
-		context.hole = ohole;
-	} else {
-		delete context.hole;
-		eta(chole);
-	}
-
+	context.hole = obj.hole;
 	return context;
 }
 
 function abst(context)
 {
-	const hole = mkhole();
-	const name = mkvar();
-	const obj = {
+	var hole = mkhole();
+	var obj = {
 		node: "abst",
-		var: name,
+		var: mkvar(),
 		body: hole,
-		fv: {},
 		hole: hole
 	};
 
-	hole.parent = obj;
-	return atom(context, obj, name);
+	return atom(context, obj);
 }
 
 function appl(left)
 {
-	const context = mkhole();
-	const hole = mkhole();
-	const obj = {
+	var context = mkhole();
+	var hole = mkhole();
+	var obj = {
 		node: "appl",
 		left: left,
 		right: hole,
-		fv: Object.assign({}, left.fv),
 		hole: hole
 	};
 
-	left.parent = obj;
-	hole.parent = obj;
 	return atom(context, obj);
 }
 
-function clone(obj, root, hole, parent)
+function clone(obj, root, hole)
 {
-	const copy = {};
+	var copy = {};
 
 	if (!obj)
 		return;
@@ -539,13 +766,9 @@ function clone(obj, root, hole, parent)
 	copy.node = obj.node;
 	copy.var = obj.var;
 	copy.name = obj.name;
-	copy.parent = parent;
-	copy.body = clone(obj.body, root, hole, copy);
-	copy.left = clone(obj.left, root, hole, copy);
-	copy.right = clone(obj.right, root, hole, copy);
-
-	copy.fv = Object.assign({}, obj.fv);
-	copy.bv = Object.assign({}, obj.bv);
+	copy.body = clone(obj.body, root, hole);
+	copy.left = clone(obj.left, root, hole);
+	copy.right = clone(obj.right, root, hole);
 
 	if (obj === hole)
 		root.hole = copy;
@@ -560,6 +783,5 @@ this.mkhole = mkhole;
 this.abst = abst;
 this.appl = appl;
 this.atom = atom;
-
 this.beta = 0;
 this.total = 0;
