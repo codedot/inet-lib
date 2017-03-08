@@ -74,22 +74,14 @@ function debug1()
 function getstats()
 {
 	const stats = {};
-	const tlen = table.length;
 
-	for (let i = 0; i < tlen; i++) {
-		const row = table[i];
-		const rlen = row.length;
-
-		for (let j = 0; j < rlen; j++) {
-			const rule = row[j];
+	table.forEach(row => {
+		row.forEach(rule => {
 			const count = rule.count;
 			let human = rule.human;
 
-			if (!human)
-				continue;
-
-			if (!count)
-				continue;
+			if (!human || !count)
+				return;
 
 			human = human.split("><");
 			human = human.sort();
@@ -99,8 +91,8 @@ function getstats()
 				stats[human] += count;
 			else
 				stats[human] = count;
-		}
-	}
+		});
+	});
 
 	return stats;
 }
