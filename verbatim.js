@@ -57,8 +57,12 @@ function genclone(body, img)
 	if (wiretype == type)
 		return `wire${img.id}`;
 
-	if (ambtype == type)
+	if (ambtype == type) {
+		if (img.need)
+			body.push(`wire${img.id}.need = true;`);
+
 		return `wire${img.id}`;
+	}
 
 	node = `node${body.nnodes}`;
 	body.push(`const ${node} = {
@@ -76,6 +80,9 @@ function genclone(body, img)
 	});
 
 	body.push(`${node}.pax = [${pax.join(", ")}];`);
+
+	if (img.need)
+		body.push(`${node}.need = true;`);
 
 	return node;
 }
