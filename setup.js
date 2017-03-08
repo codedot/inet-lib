@@ -69,6 +69,9 @@ function indamb(wire, agent)
 	main.parent = dst;
 	aux.parent = dst;
 
+	if (agent.need)
+		delegate(dst);
+
 	wire.parent = void(0);
 	wire.twin = void(0);
 	agent.parent = void(0);
@@ -95,6 +98,9 @@ function indagent(wire, agent)
 	for (let i = 0; i < plen; i++)
 		pax[i].parent = dst;
 
+	if (agent.need)
+		delegate(dst);
+
 	wire.parent = void(0);
 	wire.twin = void(0);
 	agent.parent = void(0);
@@ -105,6 +111,18 @@ function indagent(wire, agent)
 function indtnega(agent, wire)
 {
 	return indagent(wire, agent);
+}
+
+function delegate(node)
+{
+	do {
+		node.need = true;
+
+		if (ambtype == node.type)
+			delegate(node.twin);
+
+		node = node.parent;
+	} while (node && !node.need);
 }
 
 function getindir(type)
