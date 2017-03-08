@@ -387,13 +387,9 @@ function traverse(list, pair)
 function setup(src, env)
 {
 	const system = parser.parse(src);
-	const inrules = system.rules;
 	const inconf = system.conf;
-	const rlen = inrules.length;
-	const clen = inconf.length;
 	const custom = {};
 	const wires = {};
-	const queue = [];
 	const effect = mkeffect(0, 0, system.code);
 
 	table = [];
@@ -405,8 +401,7 @@ function setup(src, env)
 		amb: ambtype
 	};
 
-	for (let i = 0; i < rlen; i++) {
-		const rule = inrules[i];
+	system.rules.forEach(rule => {
 		const left = rule.left;
 		const right = rule.right;
 		const code = rule.code;
@@ -420,19 +415,15 @@ function setup(src, env)
 
 		rlfunc = apply(right, left, code, true);
 		addrule(custom, rlfunc);
-	}
+	});
 
 	for (const pair in custom)
 		custom[pair] = traverse(custom[pair], pair);
 
-	for (let i = 0; i < clen; i++) {
-		const eqn = inconf[i];
-		const left = eqn.left;
-		const right = eqn.right;
-
-		addtypes(left);
-		addtypes(right);
-	}
+	inconf.forEach(eqn => {
+		addtypes(eqn.left);
+		addtypes(eqn.right);
+	});
 
 	for (const left in types) {
 		const row = [];
@@ -461,18 +452,15 @@ function setup(src, env)
 
 	effect.call(inenv);
 
-	for (let i = 0; i < clen; i++) {
-		const eqn = inconf[i];
+	inconf.map(eqn => {
 		const left = eqn.left;
 		const right = eqn.right;
 
-		queue.push({
+		return {
 			left: encode(0, 0, left, wires, true),
 			right: encode(0, 0, right, wires, true)
-		});
-	}
-
-	queue.forEach(pair => {
+		};
+	}).forEach(pair => {
 		const left = pair.left;
 		const right = pair.right;
 
