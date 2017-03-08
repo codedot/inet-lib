@@ -174,6 +174,8 @@ function prequeue(queue, side, lval, rval, pax, wires)
 	for (let i = 0; i < plen; i++) {
 		const img = encode(lval, rval, pax[i], wires);
 
+		adopt(img);
+
 		queue.push({
 			left: {
 				type: side,
