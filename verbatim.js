@@ -92,15 +92,14 @@ function genclone(body, img)
 
 function genqueue(body, img)
 {
-	const ilen = img.length;
+	img.forEach(pair => {
+		pair.left = genclone(body, pair.left);
+		pair.right = genclone(body, pair.right);
+	});
 
-	for (let i = 0; i < ilen; i++) {
-		const pair = img[i];
-		const left = genclone(body, pair.left);
-		const right = genclone(body, pair.right);
-
-		body.push(`flush(${left}, ${right});`);
-	}
+	img.forEach(pair => {
+		body.push(`flush(${pair.left}, ${pair.right});`);
+	});
 }
 
 function generate(img, wlist, alist, effect, rl)
