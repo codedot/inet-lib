@@ -3,6 +3,10 @@
 	"author": "Anton Salikhmetov",
 	"repository": "codedot/inet-lib",
 	"name": "inet-lib",
-	"version": "0.2.5",
+	"version": "0.2.6",
+	"keywords": [
+		"interaction-nets",
+		"lambda-calculus"
+	],
 	"license": "MIT"
 }
